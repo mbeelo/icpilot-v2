@@ -14,6 +14,7 @@ ICPilot v2 is a B2B sales enablement platform that helps sales teams create idea
 - **Linting**: `npm run lint`
 - **Database migrations**: `npx drizzle-kit push` (pushes schema changes to database)
 - **Database studio**: `npx drizzle-kit studio` (opens database browser UI)
+- **Generate migrations**: `npx drizzle-kit generate` (generates migration files)
 
 ## Architecture Overview
 
@@ -61,7 +62,7 @@ All AI functions are in `src/lib/openai.ts`:
 ## Key File Locations
 
 ### Configuration
-- `drizzle.config.ts`: Database configuration
+- `drizzle.config.ts`: Database configuration (outputs to `./drizzle` directory)
 - `next.config.ts`: Next.js configuration
 - `tsconfig.json`: TypeScript configuration with path aliases (`@/*` → `src/*`)
 - `middleware.ts`: Route protection middleware

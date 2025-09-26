@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 interface ICP {
   id: string;
@@ -140,10 +141,10 @@ useEffect(() => {
         const { url } = await response.json();
         window.location.href = url;
       } else {
-        alert('Failed to start checkout');
+        toast.error('Failed to start checkout');
       }
     } catch (error) {
-      alert('Error starting checkout');
+      toast.error('Error starting checkout');
     } finally {
       setIsUpgrading(false);
     }

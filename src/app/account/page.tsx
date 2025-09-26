@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AppLayout } from '@/components/layout/app-layout';
+import toast from 'react-hot-toast';
 
 export default function AccountPage() {
   const { data: session, status } = useSession();
@@ -52,10 +53,10 @@ export default function AccountPage() {
         const { url } = await response.json();
         window.location.href = url;
       } else {
-        alert('Failed to start checkout');
+        toast.error('Failed to start checkout');
       }
     } catch (error) {
-      alert('Error starting checkout');
+      toast.error('Error starting checkout');
     } finally {
       setIsUpgrading(false);
     }
@@ -72,10 +73,10 @@ export default function AccountPage() {
         const { url } = await response.json();
         window.location.href = url;
       } else {
-        alert('Failed to open billing portal');
+        toast.error('Failed to open billing portal');
       }
     } catch (error) {
-      alert('Error opening billing portal');
+      toast.error('Error opening billing portal');
     } finally {
       setIsManagingBilling(false);
     }

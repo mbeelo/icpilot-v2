@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import toast from 'react-hot-toast';
 
 interface ICP {
   id: string;
@@ -99,14 +100,17 @@ export function OutputLibrary() {
     
     try {
       await navigator.clipboard.writeText(textToCopy);
-      alert('Copied to clipboard!');
+      toast.success('Copied to clipboard!');
     } catch (error) {
       console.error('Failed to copy:', error);
+      toast.error('Failed to copy to clipboard');
     }
   };
 
   const deleteOutput = async (outputId: string) => {
-    if (!confirm('Delete this output?')) return;
+    // Show confirmation using a more elegant method
+    const confirmDelete = window.confirm('Delete this output?');
+    if (!confirmDelete) return;
     
     try {
       const response = await fetch(`/api/outputs/${outputId}`, {
@@ -115,11 +119,12 @@ export function OutputLibrary() {
       
       if (response.ok) {
         loadData();
+        toast.success('Output deleted successfully');
       } else {
-        alert('Failed to delete output');
+        toast.error('Failed to delete output');
       }
     } catch (error) {
-      alert('Error deleting output');
+      toast.error('Error deleting output');
     }
   };
 

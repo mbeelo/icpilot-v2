@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 interface ICP {
   id: string;
@@ -60,11 +61,12 @@ export function ICPManagement() {
       if (response.ok) {
         setIcps(icps.filter(icp => icp.id !== id));
         setDeleteConfirm(null);
+        toast.success('ICP deleted successfully');
       } else {
-        alert('Failed to delete ICP');
+        toast.error('Failed to delete ICP');
       }
     } catch (error) {
-      alert('Error deleting ICP');
+      toast.error('Error deleting ICP');
     }
   };
 
