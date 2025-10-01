@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, outputs } from '@/db';
-import { eq } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import { getCurrentUser } from '@/lib/session';
 
 export async function POST(request: NextRequest) {
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error saving output:', error);
     return NextResponse.json(
-      { error: 'Failed to save output', details: error.message },
+      { error: 'Failed to save output', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
@@ -40,8 +40,11 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get outputs for the authenticated user only
-    const userOutputs = await db.select().from(outputs).where(eq(outputs.userId, user.id));
+    // Get only saved outputs for the authenticated user (limited to recent 50)
+    const userOutputs = await db.select().from(outputs).where(and(
+      eq(outputs.userId, user.id),
+      eq(outputs.isSaved, true)
+    )).orderBy(desc(outputs.createdAt)).limit(50);
     
     return NextResponse.json({ success: true, outputs: userOutputs });
   } catch (error) {

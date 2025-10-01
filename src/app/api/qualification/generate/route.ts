@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, icps, outputs, users } from '@/db';
+import { db, icps, users } from '@/db';
 import { eq } from 'drizzle-orm';
 import { generateQualificationFramework } from '@/lib/openai';
 import { getCurrentUser } from '@/lib/session';
 import { checkAndIncrementUsage } from '@/lib/usage';
+import { saveTempOutput } from '@/lib/session-storage';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,12 +15,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Check usage limits
-    const usageCheck = await checkAndIncrementUsage(user.id, user.subscriptionTier, user.usageCount);
+    const usageCheck = await checkAndIncrementUsage(user.id, user.subscriptionTier || 'free', user.usageCount || 0);
     if (!usageCheck.allowed) {
       return NextResponse.json({ error: usageCheck.error }, { status: 402 });
     }
 
-    const { icpId, frameworkType, customContext, prospectInfo } = await request.json();
+    const { icpId, frameworkType, customContext, prospectInfo, qualificationContext } = await request.json();
     
     const icp = await db.select().from(icps).where(eq(icps.id, icpId)).limit(1);
     
@@ -27,25 +28,44 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'ICP not found' }, { status: 404 });
     }
     
-    const icpData = icp[0];
-    const framework = await generateQualificationFramework(icpData, frameworkType, customContext);
-    
-    // Auto-save to library
-    await db.insert(outputs).values({
-      userId: user.id,
-      icpId: icpId,
-      type: 'framework',
-      title: `${frameworkType} Framework`,
-      input: { frameworkType, customContext, prospectInfo },
-      output: framework,
-    });
+    const icpData = {
+      ...icp[0],
+      industry: icp[0].industry || '',
+      companySize: icp[0].companySize || '',
+      role: icp[0].role || '',
+      painPoints: Array.isArray(icp[0].painPoints) ? icp[0].painPoints : [],
+      outcomes: Array.isArray(icp[0].outcomes) ? icp[0].outcomes : [],
+      triggers: Array.isArray(icp[0].triggers) ? icp[0].triggers : [],
+      companyName: icp[0].companyName || undefined,
+      productService: icp[0].productService || undefined,
+      valueProposition: icp[0].valueProposition || undefined,
+      keyDifferentiators: icp[0].keyDifferentiators || undefined,
+    };
+    const framework = await generateQualificationFramework(icpData, frameworkType, customContext, qualificationContext);
+
+    // Auto-save as temporary output (session-based)
+    const savedOutput = await saveTempOutput(
+      user.id,
+      icpId,
+      'framework',
+      `${frameworkType} Framework`,
+      { frameworkType, customContext, prospectInfo, qualificationContext },
+      framework // Save framework data directly for library display
+    );
     
     // Increment frameworks counter
 await db.update(users)
-  .set({ frameworksGenerated: user.frameworksGenerated + 1 })
+  .set({ frameworksGenerated: (user.frameworksGenerated || 0) + 1 })
   .where(eq(users.id, user.id));
   
-    return NextResponse.json({ success: true, framework });
+    return NextResponse.json({
+      success: true,
+      framework,
+      savedOutput: {
+        id: savedOutput.id,
+        framework
+      }
+    });
   } catch (error) {
     console.error('Error generating framework:', error);
     return NextResponse.json({ error: 'Failed to generate framework' }, { status: 500 });

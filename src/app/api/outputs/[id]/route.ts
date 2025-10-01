@@ -5,16 +5,18 @@ import { getCurrentUser } from '@/lib/session';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await db.delete(outputs).where(eq(outputs.id, params.id));
+    const { id } = await params;
+
+    await db.delete(outputs).where(eq(outputs.id, id));
     
     return NextResponse.json({ success: true });
   } catch (error) {

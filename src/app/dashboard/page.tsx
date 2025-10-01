@@ -1,18 +1,15 @@
 'use client';
 
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AppLayout } from '@/components/layout/app-layout';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import { useICP } from '@/contexts/icp-context';
 
-interface ICP {
-  id: string;
-  name: string;
-  industry: string;
-}
 
 interface RecentOutput {
   id: string;
@@ -20,27 +17,20 @@ interface RecentOutput {
   title: string;
   createdAt: string;
   icpName: string;
+  isSaved?: boolean;
+  isTemporary?: boolean;
 }
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { icps, selectedIcp, selectedIcpId, setSelectedIcpId, isLoading: isLoadingICPs } = useICP();
   const [userUsage, setUserUsage] = useState(0);
   const [subscriptionTier, setSubscriptionTier] = useState('free');
   const [isUpgrading, setIsUpgrading] = useState(false);
-  const [icps, setIcps] = useState<ICP[]>([]);
   const [recentOutputs, setRecentOutputs] = useState<RecentOutput[]>([]);
   const [outputStats, setOutputStats] = useState({ objections: 0, messages: 0, frameworks: 0 });
-  const [isLoadingICPs, setIsLoadingICPs] = useState(true);
-  const [selectedIcpId, setSelectedIcpId] = useState<string>('');
-
-// Load saved ICP selection from localStorage on mount
-useEffect(() => {
-  const savedIcpId = localStorage.getItem('selectedIcpId');
-  if (savedIcpId) {
-    setSelectedIcpId(savedIcpId);
-  }
-}, []);
+  const [isMilestoneBannerDismissed, setIsMilestoneBannerDismissed] = useState(false);
 
 // Detect successful upgrade from URL params
 useEffect(() => {
@@ -49,14 +39,13 @@ useEffect(() => {
     // Force refresh data after upgrade
     window.location.reload();
   }
-}, []);
 
-// Save ICP selection to localStorage whenever it changes
-useEffect(() => {
-  if (selectedIcpId) {
-    localStorage.setItem('selectedIcpId', selectedIcpId);
+  // Check if milestone banner was previously dismissed
+  const dismissed = localStorage.getItem('milestoneBannerDismissed');
+  if (dismissed === 'true') {
+    setIsMilestoneBannerDismissed(true);
   }
-}, [selectedIcpId]);
+}, []);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -81,33 +70,20 @@ useEffect(() => {
           })
           .catch(console.error);
 
-        // Fetch ICPs
-        fetch('/api/icps')
-          .then(res => res.json())
-          .then(data => {
-            const icpArray = data.icps || data || [];
-            setIcps(icpArray);
-            if (icpArray.length > 0 && !selectedIcpId) {
-            // Try to load saved ICP first
-            const savedIcpId = localStorage.getItem('selectedIcpId');
-            const savedIcpExists = icpArray.some((icp: ICP) => icp.id === savedIcpId);
-            
-            if (savedIcpId && savedIcpExists) {
-              setSelectedIcpId(savedIcpId);
-            } else {
-              setSelectedIcpId(icpArray[0].id);
-            }
-          }
-            setIsLoadingICPs(false);
-          })
-          .catch(() => setIsLoadingICPs(false));
 
-        // Fetch recent outputs for activity feed only
-      fetch('/api/outputs')
-        .then(res => res.json())
-        .then(data => {
-          const outputs = data.outputs || [];
-          setRecentOutputs(outputs.slice(0, 5));
+        // Fetch both saved and temporary outputs for activity feed
+        Promise.all([
+          fetch('/api/outputs'),
+          fetch('/api/outputs/temporary')
+        ])
+        .then(([savedRes, tempRes]) => Promise.all([savedRes.json(), tempRes.json()]))
+        .then(([savedData, tempData]) => {
+          const savedOutputs = (savedData.outputs || []).map((o: RecentOutput) => ({...o, isSaved: true}));
+          const tempOutputs = (tempData.outputs || []).map((o: RecentOutput) => ({...o, isTemporary: true}));
+          const allOutputs = [...savedOutputs, ...tempOutputs]
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .slice(0, 8); // Show more recent items
+          setRecentOutputs(allOutputs);
         })
         .catch(console.error);
             }
@@ -128,7 +104,7 @@ useEffect(() => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', fetchData);
     };
-  }, [session, selectedIcpId]);
+  }, [session]);
 
   const handleUpgrade = async () => {
     setIsUpgrading(true);
@@ -143,7 +119,7 @@ useEffect(() => {
       } else {
         toast.error('Failed to start checkout');
       }
-    } catch (error) {
+    } catch {
       toast.error('Error starting checkout');
     } finally {
       setIsUpgrading(false);
@@ -158,6 +134,33 @@ useEffect(() => {
     router.push(`/${tool}?icpId=${selectedIcpId}`);
   };
 
+  const dismissMilestoneBanner = () => {
+    setIsMilestoneBannerDismissed(true);
+    localStorage.setItem('milestoneBannerDismissed', 'true');
+  };
+
+  const saveToLibrary = async (output: RecentOutput) => {
+    try {
+      const response = await fetch('/api/outputs/save-to-library', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ outputId: output.id }),
+      });
+
+      if (response.ok) {
+        toast.success('Saved to library!');
+        // Refresh the data to show updated state
+        fetchData();
+      } else {
+        toast.error('Failed to save to library');
+      }
+    } catch {
+      toast.error('Error saving to library');
+    }
+  };
+
   if (status === 'loading') {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
@@ -166,25 +169,25 @@ useEffect(() => {
     return null;
   }
 
+  // Show loading state while ICPs are being fetched to prevent flash
+  if (isLoadingICPs) {
+    return (
+      <AppLayout>
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading your dashboard...</p>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
   const hasICP = icps.length > 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-blue-600">ICPPilot</h1>
-          <div className="flex items-center gap-4">
-            <Link href="/account" className="text-gray-700 hover:text-gray-900">
-              Welcome, {session.user?.name}
-            </Link>
-            <Button variant="outline" onClick={() => signOut({ callbackUrl: '/' })}>
-              Sign Out
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 py-8">
+    <AppLayout>
+      <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Quick Start Banner - Only show for new users without ICP */}
         {!hasICP && !isLoadingICPs && (
           <Card className="mb-8 border-blue-200 bg-blue-50">
@@ -209,80 +212,129 @@ useEffect(() => {
           </Card>
         )}
 
-        {/* ICP Selector & Quick Stats */}
+        {/* Weekly Progress & Stats */}
         {hasICP && (
-          <div className="grid md:grid-cols-4 gap-4 mb-8">
-            <Card className="md:col-span-1">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm text-gray-600">Active ICP</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <select
-                  value={selectedIcpId}
-                  onChange={(e) => setSelectedIcpId(e.target.value)}
-                  className="w-full p-2 border rounded-md text-sm"
-                >
-                  {icps.map(icp => (
-                    <option key={icp.id} value={icp.id}>
-                      {icp.name}
-                    </option>
-                  ))}
-                </select>
-                <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full"
-                    onClick={() => {
-                      if (icps.length === 0) {
-                        router.push('/icp-builder');
-                      } else {
-                        router.push('/icp-builder/manage');
-                      }
+          <>
+            {/* Progress Summary */}
+            {(outputStats.objections > 0 || outputStats.messages > 0 || outputStats.frameworks > 0) && !isMilestoneBannerDismissed && (
+              <Card className="mb-6 border-green-200 bg-green-50">
+                <CardContent className="py-4">
+                  <div className="flex items-center gap-4">
+                    <div className="text-3xl">🎉</div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-green-900 mb-1">
+                        Your team is getting stronger!
+                      </h3>
+                      <p className="text-green-700 text-sm">
+                        You&apos;ve built {outputStats.objections + outputStats.messages + outputStats.frameworks} assets using proven industry methodologies.
+                        {outputStats.objections > 0 && ` ${outputStats.objections} world-class rebuttals`}
+                        {outputStats.messages > 0 && ` • ${outputStats.messages} high-converting messages`}
+                        {outputStats.frameworks > 0 && ` • ${outputStats.frameworks} strategic frameworks`}
+                        . Your competitive advantage is growing! 🚀
+                      </p>
+                    </div>
+                    <button
+                      onClick={dismissMilestoneBanner}
+                      className="text-green-600 hover:text-green-800 transition-colors p-1"
+                      aria-label="Dismiss milestone banner"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            <div className="grid md:grid-cols-4 gap-4 mb-8">
+              <Card className="md:col-span-1">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm text-gray-600">Active ICP</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <select
+                    value={selectedIcpId}
+                    onChange={(e) => setSelectedIcpId(e.target.value)}
+                    className="w-full p-3 border-2 border-blue-200 rounded-xl text-sm font-medium text-gray-900 bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 hover:border-blue-300 hover:shadow-md transform hover:-translate-y-0.5 appearance-none cursor-pointer"
+                    style={{
+                      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                      backgroundPosition: 'right 0.75rem center',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundSize: '1.5em 1.5em'
                     }}
                   >
-                    {icps.length > 0 ? 'Manage ICPs' : 'Create First ICP →'}
-                  </Button>
-              </CardContent>
-            </Card>
+                    {icps.map(icp => (
+                      <option key={icp.id} value={icp.id}>
+                        {icp.name}
+                      </option>
+                    ))}
+                  </select>
+                  <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full mt-3"
+                      onClick={() => {
+                        if (icps.length === 0) {
+                          router.push('/icp-builder');
+                        } else {
+                          router.push('/icp-builder/manage');
+                        }
+                      }}
+                    >
+                      {icps.length > 0 ? 'Manage ICPs' : 'Create First ICP →'}
+                    </Button>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm text-gray-600">Objections</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold text-gray-900">{outputStats.objections}</p>
-                <p className="text-xs text-gray-500">rebuttals created</p>
-              </CardContent>
-            </Card>
+              <Card className="hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm text-gray-600">Objections Handled</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold text-blue-600">{outputStats.objections}</p>
+                  <p className="text-xs text-gray-500">rebuttals ready to use</p>
+                  {outputStats.objections > 0 && (
+                    <p className="text-xs text-green-600 mt-1">💪 {outputStats.objections * 15} minutes saved</p>
+                  )}
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm text-gray-600">Messages</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold text-gray-900">{outputStats.messages}</p>
-                <p className="text-xs text-gray-500">outreach generated</p>
-              </CardContent>
-            </Card>
+              <Card className="hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm text-gray-600">Outreach Generated</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold text-green-600">{outputStats.messages}</p>
+                  <p className="text-xs text-gray-500">personalized messages</p>
+                  {outputStats.messages > 0 && (
+                    <p className="text-xs text-green-600 mt-1">⚡ {outputStats.messages * 20} minutes saved</p>
+                  )}
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm text-gray-600">Frameworks</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold text-gray-900">{outputStats.frameworks}</p>
-                <p className="text-xs text-gray-500">discovery systems</p>
-              </CardContent>
-            </Card>
-          </div>
+              <Card className="hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm text-gray-600">Discovery Systems</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold text-purple-600">{outputStats.frameworks}</p>
+                  <p className="text-xs text-gray-500">qualification frameworks</p>
+                  {outputStats.frameworks > 0 && (
+                    <p className="text-xs text-green-600 mt-1">🎯 {outputStats.frameworks * 45} minutes saved</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </>
         )}
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Tools */}
           <div className="lg:col-span-2 space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Sales Toolkit</h2>
-              <p className="text-gray-600 mb-6">Generate assets for your active ICP</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Performance Multipliers</h2>
+              <p className="text-gray-600 mb-6">Leverage industry-proven sales methodologies powered by AI</p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
@@ -292,7 +344,7 @@ useEffect(() => {
                   <CardTitle className="text-blue-600">🎯 ICP Builder</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 text-sm mb-3">Create and manage your Ideal Customer Profiles</p>
+                  <p className="text-gray-600 text-sm mb-3">Define your ideal prospects to fuel world-class sales assets</p>
                   {!isLoadingICPs && (
                     <p className="text-sm font-medium text-blue-600 mb-3">
                       {icps.length > 0 ? `✓ ${icps.length} ICP${icps.length > 1 ? 's' : ''} created` : 'Get started here'}
@@ -321,7 +373,7 @@ useEffect(() => {
                   <CardTitle className="text-blue-600">💪 Objection Killer</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 text-sm mb-3">Generate bulletproof rebuttals for any objection</p>
+                  <p className="text-gray-600 text-sm mb-3">Handle objections using world-class industry frameworks</p>
                   {!hasICP && !isLoadingICPs ? (
                     <p className="text-sm text-gray-500 mb-3">Create an ICP first</p>
                   ) : (
@@ -345,7 +397,7 @@ useEffect(() => {
                   <CardTitle className="text-blue-600">✉️ Message Generator</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 text-sm mb-3">Create personalized outreach that gets responses</p>
+                  <p className="text-gray-600 text-sm mb-3">Send outreach using proven high-converting frameworks</p>
                   {!hasICP && !isLoadingICPs ? (
                     <p className="text-sm text-gray-500 mb-3">Create an ICP first</p>
                   ) : (
@@ -369,7 +421,7 @@ useEffect(() => {
                   <CardTitle className="text-blue-600">🔍 Qualification Framework</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 text-sm mb-3">Build discovery systems that identify ideal prospects</p>
+                  <p className="text-gray-600 text-sm mb-3">Qualify prospects using industry-proven discovery frameworks</p>
                   {!hasICP && !isLoadingICPs ? (
                     <p className="text-sm text-gray-500 mb-3">Create an ICP first</p>
                   ) : (
@@ -399,6 +451,7 @@ useEffect(() => {
                 </CardContent>
               </Card>
             </Link>
+
           </div>
 
           {/* Right Column - Recent Activity & Account */}
@@ -412,19 +465,57 @@ useEffect(() => {
                 {recentOutputs.length > 0 ? (
                   <div className="space-y-3">
                     {recentOutputs.map(output => (
-                      <div key={output.id} className="border-l-2 border-blue-500 pl-3">
-                        <p className="text-sm font-medium text-gray-900">{output.title}</p>
-                        <p className="text-xs text-gray-500">
-                          {output.type === 'objection' && '💪 Objection'}
-                          {output.type === 'message' && '✉️ Message'}
-                          {output.type === 'framework' && '🔍 Framework'}
-                          {' • '}
-                          {output.icpName}
-                        </p>
+                      <div
+                        key={output.id}
+                        className="group border-l-2 border-blue-500 pl-3 py-2 cursor-pointer hover:bg-gray-50 rounded-r-lg transition-colors"
+                        onClick={() => router.push(`/library?outputId=${output.id}`)}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors">{output.title}</p>
+                              {output.isSaved && (
+                                <span className="bg-green-100 text-green-800 text-xs px-1.5 py-0.5 rounded-full">
+                                  💾
+                                </span>
+                              )}
+                              {output.isTemporary && (
+                                <span className="bg-orange-100 text-orange-800 text-xs px-1.5 py-0.5 rounded-full">
+                                  🕒
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500">
+                              {output.type === 'objection' && '💪 Objection'}
+                              {output.type === 'message' && '✉️ Message'}
+                              {output.type === 'framework' && '🔍 Framework'}
+                              {' • '}
+                              {output.icpName}
+                              {' • '}
+                              {new Date(output.createdAt).toLocaleDateString()}
+                            </p>
+                            <p className="text-xs text-blue-600 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              Click to view in library →
+                            </p>
+                          </div>
+                          {output.isTemporary && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation(); // Prevent navigation when clicking save button
+                                saveToLibrary(output);
+                              }}
+                              className="ml-2 text-xs px-2 py-1 h-auto bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                            >
+                              💾 Save
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     ))}
                     <Link href="/library">
-                      <Button variant="link" size="sm" className="w-full text-blue-600">
+                      <Button variant="outline" size="sm" className="w-full">
                         View All in Library →
                       </Button>
                     </Link>
@@ -490,12 +581,15 @@ useEffect(() => {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 text-sm mb-3">Need help getting started?</p>
-                <Button variant="outline" className="w-full">Contact Support</Button>
+                <Link href="/support">
+                  <Button variant="outline" className="w-full">Contact Support</Button>
+                </Link>
               </CardContent>
             </Card>
+
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 }

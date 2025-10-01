@@ -11,7 +11,13 @@ import toast from 'react-hot-toast';
 export default function AccountPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [userData, setUserData] = useState<any>(null);
+  const [userData, setUserData] = useState<{
+    usageCount: number;
+    subscriptionTier: string;
+    objectionsGenerated: number;
+    messagesGenerated: number;
+    frameworksGenerated: number;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isManagingBilling, setIsManagingBilling] = useState(false);
   const [isUpgrading, setIsUpgrading] = useState(false);
@@ -30,8 +36,8 @@ export default function AccountPage() {
           const data = await response.json();
           setUserData(data);
         }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
+      } catch {
+        console.error('Error fetching user data');
       } finally {
         setIsLoading(false);
       }
@@ -55,7 +61,7 @@ export default function AccountPage() {
       } else {
         toast.error('Failed to start checkout');
       }
-    } catch (error) {
+    } catch {
       toast.error('Error starting checkout');
     } finally {
       setIsUpgrading(false);
@@ -75,7 +81,7 @@ export default function AccountPage() {
       } else {
         toast.error('Failed to open billing portal');
       }
-    } catch (error) {
+    } catch {
       toast.error('Error opening billing portal');
     } finally {
       setIsManagingBilling(false);

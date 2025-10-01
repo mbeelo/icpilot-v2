@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, icps, users } from '@/db';
+import { db, icps } from '@/db';
 import { eq } from 'drizzle-orm';
 import { getCurrentUser } from '@/lib/session';
 
@@ -55,7 +55,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error saving ICP:', error);
     return NextResponse.json(
-      { error: 'Failed to save ICP', details: error.message },
+      {
+        error: 'Failed to save ICP',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }

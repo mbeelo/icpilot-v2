@@ -3,11 +3,13 @@
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 
 export function AppNav() {
   const { data: session } = useSession();
   const pathname = usePathname();
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const isActive = (path: string) => pathname === path;
 
@@ -17,7 +19,7 @@ export function AppNav() {
         <div className="flex justify-between items-center h-16">
           {/* Logo/Home */}
           <Link href="/dashboard" className="text-2xl font-bold text-blue-600 hover:text-blue-700">
-            ICPPilot
+            ICP Pilot
           </Link>
 
           {/* Main Nav */}
@@ -89,12 +91,22 @@ export function AppNav() {
             <span className="text-sm text-gray-700 hidden md:block">
               {session?.user?.name}
             </span>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
-              onClick={() => signOut({ callbackUrl: '/' })}
+              onClick={async () => {
+                setIsSigningOut(true);
+                try {
+                  await signOut({ redirect: false });
+                  window.location.href = '/login';
+                } catch (error) {
+                  console.error('Sign out error:', error);
+                  setIsSigningOut(false);
+                }
+              }}
+              disabled={isSigningOut}
             >
-              Sign Out
+              {isSigningOut ? 'Signing out...' : 'Sign Out'}
             </Button>
           </div>
         </div>

@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { useState, useEffect } from 'react';
+import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
+import Head from 'next/head';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -13,6 +14,13 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      router.push('/dashboard');
+    }
+  }, [status, session, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,37 +47,49 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-blue-600">ICPilot</CardTitle>
+    <>
+      <Head>
+        <title>Sign In | ICP Pilot</title>
+        <meta name="description" content="Sign in to your ICP Pilot account and access AI-powered sales enablement tools." />
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+      <Card className="w-full max-w-md border-2">
+        <CardHeader className="text-center pb-3">
+          <CardTitle className="text-2xl font-bold text-blue-600">ICP Pilot</CardTitle>
           <p className="text-gray-600">Sign in to your account</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-3">
+              <div id="login-error" role="alert" className="bg-red-50 border border-red-200 rounded-md p-3">
                 <p className="text-red-800 text-sm">{error}</p>
               </div>
             )}
             
             <div>
-              <label className="block text-sm font-medium mb-2 text-gray-900">Email</label>
+              <label htmlFor="email" className="block text-sm font-medium mb-2 text-gray-900">Email</label>
               <input
+                id="email"
                 type="email"
                 required
-                className="w-full p-3 border rounded-md text-gray-900"
+                autoComplete="username"
+                aria-describedby={error ? 'login-error' : undefined}
+                className="w-full p-3 border rounded-md text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-2 text-gray-900">Password</label>
+              <label htmlFor="password" className="block text-sm font-medium mb-2 text-gray-900">Password</label>
               <input
+                id="password"
                 type="password"
                 required
-                className="w-full p-3 border rounded-md text-gray-900"
+                autoComplete="current-password"
+                aria-describedby={error ? 'login-error' : undefined}
+                className="w-full p-3 border rounded-md text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -86,7 +106,7 @@ export default function LoginPage() {
 
           <div className="mt-4 text-center">
             <p className="text-gray-600">
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Link href="/register" className="text-blue-600 hover:underline">
                 Sign up
               </Link>
@@ -94,6 +114,7 @@ export default function LoginPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </>
   );
 }

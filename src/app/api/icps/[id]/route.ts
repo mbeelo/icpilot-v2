@@ -1,22 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, icps } from '@/db';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { getCurrentUser } from '@/lib/session';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     // Delete the ICP (only if it belongs to the user)
     await db.delete(icps)
-      .where(eq(icps.id, params.id));
+      .where(and(eq(icps.id, id), eq(icps.userId, user.id)));
     
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -30,17 +32,18 @@ export async function DELETE(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
-    
+    const { id } = await params;
+
     const updatedIcp = await db.update(icps)
       .set({
         name: body.name,
@@ -56,7 +59,7 @@ export async function PUT(
         keyDifferentiators: body.keyDifferentiators ? body.keyDifferentiators.split(',').map((d: string) => d.trim()).filter(Boolean) : [],
         updatedAt: new Date(),
       })
-      .where(eq(icps.id, params.id))
+      .where(and(eq(icps.id, id), eq(icps.userId, user.id)))
       .returning();
     
     return NextResponse.json({ success: true, icp: updatedIcp[0] });

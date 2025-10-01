@@ -13,15 +13,15 @@ export function UpgradeModal({ isOpen, onClose, onUpgrade }: UpgradeModalProps) 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <Card className="max-w-md w-full">
-        <CardHeader>
-          <CardTitle className="text-2xl">Upgrade to Pro</CardTitle>
+    <div className="fixed inset-0 backdrop-blur-sm bg-white/10 flex items-center justify-center z-50 p-4">
+      <Card className="max-w-md w-full shadow-2xl border-2 border-white/20 bg-white/95 backdrop-blur-md">
+        <CardHeader className="bg-blue-50 rounded-t-lg">
+          <CardTitle className="text-2xl text-gray-900">Upgrade to Pro</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 bg-white/95">
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-blue-900 font-medium mb-2">
-              You've reached your free limit of 5 outputs this month
+              You&apos;ve reached your free limit of 5 outputs this month
             </p>
             <p className="text-blue-800 text-sm">
               Upgrade to Pro for unlimited access to all tools

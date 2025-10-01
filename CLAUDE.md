@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ICPilot v2 is a B2B sales enablement platform that helps sales teams create ideal customer profiles (ICPs), generate objection rebuttals, craft personalized outreach messages, and build qualification frameworks. The application uses AI (OpenAI GPT-4) to generate personalized sales content based on user-defined ICPs.
+ICP Pilot v2 is a B2B sales enablement platform that helps sales teams create ideal customer profiles (ICPs), generate objection rebuttals, craft personalized outreach messages, and build qualification frameworks. The application uses AI (OpenAI GPT-4) to generate personalized sales content based on user-defined ICPs.
 
 ## Development Commands
 
