@@ -781,49 +781,78 @@ export function ObjectionKiller() {
 
       {/* Results - 3 Sophisticated Variants */}
       {responses.length > 0 && (
-        <div className="space-y-6">
-          <Card className="border-2">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-2xl text-green-800 text-center">
-                  🎯 Your Expert Objection Responses
-                </CardTitle>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={copyAllResponses}
-                >
-                  📋 Copy All
-                </Button>
-              </div>
-              <p className="text-center text-green-700">3 world-class response variants for different situations</p>
-            </CardHeader>
-          </Card>
-
-          {responses.map((response, index) => (
-            <div className="border-l-4 border-blue-500 pl-4 py-2">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h4 className="font-semibold text-blue-700 mb-2">{response.variant}</h4>
-                  <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">{response.approach}</span>
-                  <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded ml-2">{response.bestFor}</span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => copyToClipboard(response)}
-                >
-                  📋 Copy
-                </Button>
-              </div>
-              <div className="border-l-4 border-gray-400 pl-4 py-2">
-                <p className="text-gray-800 leading-relaxed whitespace-pre-line">
-                  {response.response}
-                </p>
-              </div>
+        <Card className="border-2 border-gray-200">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-2xl text-green-800">
+                🎯 Your Expert Objection Responses
+              </CardTitle>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={copyAllResponses}
+              >
+                📋 Copy All
+              </Button>
             </div>
-          ))}
-        </div>
+            <p className="text-green-700">3 world-class response variants for different situations</p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {responses.map((response, index) => {
+              // Get colors based on variant name to match home screen
+              const getVariantColors = (variant: string) => {
+                if (variant.includes('Consultative Partner')) {
+                  return {
+                    border: 'border-green-500',
+                    text: 'text-green-700',
+                    bg: 'bg-green-100'
+                  };
+                } else if (variant.includes('Evidence-Driven')) {
+                  return {
+                    border: 'border-purple-500',
+                    text: 'text-purple-700',
+                    bg: 'bg-purple-100'
+                  };
+                } else {
+                  // Executive Challenger (default)
+                  return {
+                    border: 'border-blue-500',
+                    text: 'text-blue-700',
+                    bg: 'bg-blue-100'
+                  };
+                }
+              };
+
+              const colors = getVariantColors(response.variant);
+
+              return (
+              <div key={index} className={`border-l-4 ${colors.border} pl-4 py-2`}>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h4 className={`font-semibold ${colors.text} mb-2`}>{response.variant}</h4>
+                    <div className="flex gap-2">
+                      <span className={`px-2 py-1 ${colors.bg} ${colors.text} text-xs font-medium rounded`}>{response.approach}</span>
+                      <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded">{response.bestFor}</span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard(response)}
+                  >
+                    📋 Copy
+                  </Button>
+                </div>
+                <div className="border-l-4 border-gray-400 pl-4 py-2">
+                  <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+                    {response.response}
+                  </p>
+                </div>
+              </div>
+              );
+            })}
+          </CardContent>
+        </Card>
       )}
 
       <UpgradeModal

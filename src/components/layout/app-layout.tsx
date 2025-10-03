@@ -1,6 +1,7 @@
 'use client';
 
-import { useSession, signOut } from 'next-auth/react';
+import { useUser } from '@/hooks/use-user';
+import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -13,7 +14,7 @@ interface AppLayoutProps {
 
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const { data: session, status } = useSession();
+  const { user, loading } = useUser();
   const { icps, selectedIcp, selectedIcpId, isLoading: isLoadingICPs, setSelectedIcpId } = useICP();
   const pathname = usePathname();
   const router = useRouter();
@@ -25,14 +26,14 @@ export function AppLayout({ children }: AppLayoutProps) {
   // All useEffect hooks must be called before any early returns
   // Redirect to login if not authenticated
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (!loading && !user) {
       router.push('/login');
     }
-  }, [status, router]);
+  }, [loading, user, router]);
 
 
   // Show loading while checking authentication
-  if (status === 'loading') {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -44,7 +45,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   }
 
   // Don't render anything if not authenticated (redirect is in progress)
-  if (!session) {
+  if (!user) {
     return null;
   }
 
@@ -174,7 +175,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                   isActive('/account') ? 'text-blue-600' : 'text-gray-700 hover:text-gray-900'
                 }`}
               >
-                {session?.user?.name}
+                {user?.user_metadata?.name || user?.email}
               </Link>
               <Button
                 variant="outline"
@@ -182,7 +183,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                 onClick={async () => {
                   setIsSigningOut(true);
                   try {
-                    await signOut({ redirect: false });
+                    await supabase.auth.signOut();
                     window.location.href = '/login';
                   } catch (error) {
                     console.error('Sign out error:', error);
@@ -325,7 +326,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  👤 {session?.user?.name}
+                  👤 {user?.user_metadata?.name || user?.email}
                 </Link>
                 <Button
                   variant="outline"
@@ -334,7 +335,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                     setIsMobileMenuOpen(false);
                     setIsSigningOut(true);
                     try {
-                      await signOut({ redirect: false });
+                      await supabase.auth.signOut();
                       window.location.href = '/login';
                     } catch (error) {
                       console.error('Sign out error:', error);

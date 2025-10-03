@@ -1,35 +1,64 @@
-import { getServerSession } from 'next-auth';
-import { authOptions } from './auth';
+import { createServerSupabaseClient } from './supabase-server';
 import { db, users } from '@/db';
 import { eq } from 'drizzle-orm';
 import { withDatabaseMonitoring } from './sre/performance-monitor';
 import { stateReliabilityAgent } from './sre/state-reliability';
 
 export async function getCurrentUser() {
-  const session = await getServerSession(authOptions);
+  const supabase = await createServerSupabaseClient();
 
-  if (!session?.user?.id) {
+  const { data: { user }, error } = await supabase.auth.getUser();
+
+  console.log('getCurrentUser:', {
+    hasUser: !!user,
+    userId: user?.id,
+    error: error?.message
+  });
+
+  if (error || !user?.id) {
+    console.log('No user found in getCurrentUser');
     return null;
   }
 
   // Get full user data from database with performance monitoring
-  const user = await withDatabaseMonitoring(
+  const userData = await withDatabaseMonitoring(
     'select',
     'getCurrentUser - fetch user by session ID'
-  )(() => db.select().from(users).where(eq(users.id, session.user.id)).limit(1));
+  )(() => db.select().from(users).where(eq(users.id, user.id)).limit(1));
 
-  if (!user.length) {
-    return null;
+  if (!userData.length) {
+    // User exists in Supabase Auth but not in our database
+    // Create the user record
+    console.log('Creating user record for Supabase auth user:', user.id);
+
+    const newUser = await withDatabaseMonitoring(
+      'insert',
+      'getCurrentUser - create user record'
+    )(() => db.insert(users).values({
+      id: user.id,
+      email: user.email!,
+      name: user.user_metadata?.name || user.user_metadata?.full_name || null,
+      subscriptionStatus: 'active',
+      subscriptionTier: 'free',
+      stripeCustomerId: null,
+      usageCount: 0,
+      objectionsGenerated: 0,
+      messagesGenerated: 0,
+      frameworksGenerated: 0,
+    }).returning());
+
+    console.log('Created user record:', newUser[0]);
+    return newUser[0];
   }
 
   // Verify session consistency for state reliability
-  const userData = user[0];
-  const validation = await stateReliabilityAgent.verifySessionConsistency(userData.id);
+  const userRecord = userData[0];
+  const validation = await stateReliabilityAgent.verifySessionConsistency(userRecord.id);
 
   if (!validation.isConsistent && validation.correctedState) {
     // Use corrected state if available
     return validation.correctedState;
   }
 
-  return userData;
+  return userRecord;
 }

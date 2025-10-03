@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@/hooks/use-user';
 
 interface UsageData {
   usageCount: number;
@@ -13,13 +13,13 @@ interface UsageData {
 }
 
 export function useUsage() {
-  const { data: session } = useSession();
+  const { user } = useUser();
   const [usage, setUsage] = useState<UsageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchUsage = async () => {
-    if (!session?.user?.id) {
+    if (!user?.id) {
       setLoading(false);
       return;
     }
@@ -44,7 +44,7 @@ export function useUsage() {
 
   useEffect(() => {
     fetchUsage();
-  }, [session?.user?.id]);
+  }, [user?.id]);
 
   // Function to check if user can make a request before calling API
   const canMakeRequest = (): boolean => {

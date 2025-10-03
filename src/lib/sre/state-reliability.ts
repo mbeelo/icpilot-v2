@@ -8,8 +8,7 @@
  * 4. Authentication flow optimization
  */
 
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { db, users } from '@/db';
 import { eq } from 'drizzle-orm';
 import { SUBSCRIPTION_TIERS } from '@/lib/constants';
@@ -60,9 +59,10 @@ export class StateReliabilityAgent {
     const issues: StateInconsistency[] = [];
 
     try {
-      const session = await getServerSession(authOptions);
+      const supabase = createServerSupabaseClient();
+      const { data: { user }, error } = await supabase.auth.getUser();
 
-      if (!session?.user?.id) {
+      if (error || !user?.id) {
         if (userId) {
           issues.push({
             type: 'session',
@@ -70,13 +70,13 @@ export class StateReliabilityAgent {
             description: 'User session missing but user ID provided',
             userId,
             timestamp: Date.now(),
-            metadata: { expectedUserId: userId }
+            metadata: { expectedUserId: userId, error: error?.message }
           });
         }
         return { isConsistent: !userId, issues };
       }
 
-      const sessionUserId = session.user.id;
+      const sessionUserId = user.id;
 
       // Verify session user exists in database
       const dbUser = await db.select().from(users).where(eq(users.id, sessionUserId)).limit(1);
@@ -88,7 +88,7 @@ export class StateReliabilityAgent {
           description: 'Session user not found in database',
           userId: sessionUserId,
           timestamp: Date.now(),
-          metadata: { sessionData: session.user }
+          metadata: { sessionData: user }
         });
       }
 
@@ -106,40 +106,27 @@ export class StateReliabilityAgent {
 
       // Verify subscription tier consistency
       if (dbUser.length > 0) {
-        const user = dbUser[0];
-        const sessionTier = session.user.subscriptionTier || 'free';
-        const dbTier = user.subscriptionTier || 'free';
+        const userRecord = dbUser[0];
+        // With Supabase, we don't store subscription info in the session
+        // All subscription data comes from the database
+        const dbTier = userRecord.subscriptionTier || 'free';
 
-        if (sessionTier !== dbTier) {
+        // Just verify that the database has valid subscription data
+        if (!Object.values(SUBSCRIPTION_TIERS).includes(dbTier as any)) {
           issues.push({
             type: 'subscription',
             severity: 'high',
-            description: 'Subscription tier mismatch between session and database',
+            description: 'Invalid subscription tier in database',
             userId: sessionUserId,
             timestamp: Date.now(),
-            metadata: { sessionTier, dbTier }
-          });
-        }
-
-        // Verify usage count consistency
-        const sessionUsage = session.user.usageCount || 0;
-        const dbUsage = user.usageCount || 0;
-
-        if (Math.abs(sessionUsage - dbUsage) > 1) { // Allow for slight async differences
-          issues.push({
-            type: 'usage',
-            severity: 'medium',
-            description: 'Usage count mismatch between session and database',
-            userId: sessionUserId,
-            timestamp: Date.now(),
-            metadata: { sessionUsage, dbUsage, difference: Math.abs(sessionUsage - dbUsage) }
+            metadata: { dbTier, validTiers: Object.values(SUBSCRIPTION_TIERS) }
           });
         }
       }
 
       // Store snapshot for analysis
       if (dbUser.length > 0) {
-        this.storeStateSnapshot(sessionUserId, session, dbUser[0], issues);
+        this.storeStateSnapshot(sessionUserId, user, dbUser[0], issues);
       }
 
       // Log issues
@@ -224,17 +211,18 @@ export class StateReliabilityAgent {
           recommendations.push('Reset to free tier and re-verify subscription');
         }
       } else if (currentTier !== 'free') {
-        // User has paid tier but no Stripe ID
+        // User has paid tier but no Stripe ID - log but don't auto-downgrade
         issues.push({
           type: 'subscription',
-          severity: 'high',
-          description: 'Paid tier without Stripe customer ID',
+          severity: 'medium',
+          description: 'Paid tier without Stripe customer ID - needs manual verification',
           userId,
           timestamp: Date.now(),
           metadata: { currentTier, stripeCustomerId: userData.stripeCustomerId }
         });
-        suggestedTier = 'free';
-        recommendations.push('Verify subscription payment status or downgrade to free');
+        // Don't automatically downgrade - could be manual upgrade or test account
+        suggestedTier = currentTier;
+        recommendations.push('Manual verification required - could be development/test account');
       }
 
       // Check usage limits consistency
@@ -341,20 +329,21 @@ export class StateReliabilityAgent {
 
     // Measure session lookup time
     const sessionStart = performance.now();
-    const session = await getServerSession(authOptions);
+    const supabase = createServerSupabaseClient();
+    const { data: { user }, error } = await supabase.auth.getUser();
     const sessionTime = performance.now() - sessionStart;
 
     // Measure database query time
     const dbStart = performance.now();
     let dbTime = 0;
 
-    if (session?.user?.id) {
-      const user = await db.select().from(users).where(eq(users.id, session.user.id)).limit(1);
+    if (!error && user?.id) {
+      const userRecord = await db.select().from(users).where(eq(users.id, user.id)).limit(1);
       dbTime = performance.now() - dbStart;
 
       // Check if user data is efficiently structured
-      if (user.length > 0) {
-        const userData = user[0];
+      if (userRecord.length > 0) {
+        const userData = userRecord[0];
 
         // Suggest optimizations based on data access patterns
         if (!userData.subscriptionTier) {

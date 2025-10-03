@@ -2,10 +2,9 @@ import { pgTable, text, timestamp, integer, boolean, jsonb, uuid, varchar } from
 import { relations } from 'drizzle-orm';
 
 export const users = pgTable('users', {
-  id: uuid('id').primaryKey().defaultRandom(),
+  id: uuid('id').primaryKey(),
   email: varchar('email', { length: 255 }).notNull().unique(),
   name: varchar('name', { length: 255 }),
-  passwordHash: varchar('password_hash', { length: 255 }),
   subscriptionTier: varchar('subscription_tier', { length: 50 }).default('free'),
   subscriptionStatus: varchar('subscription_status', { length: 50 }).default('inactive'),
   stripeCustomerId: varchar('stripe_customer_id', { length: 255 }),
@@ -24,10 +23,10 @@ export const icps = pgTable('icps', {
   industry: varchar('industry', { length: 255 }),
   companySize: varchar('company_size', { length: 100 }),
   role: varchar('role', { length: 255 }),
-  painPoints: jsonb('pain_points'),
-  outcomes: jsonb('outcomes'),
-  triggers: jsonb('triggers'),
-  dealKillers: jsonb('deal_killers'),
+  painPoints: text('pain_points').array(),
+  outcomes: text('outcomes').array(),
+  triggers: text('triggers').array(),
+  dealKillers: text('deal_killers').array(),
   companyName: text('company_name'),
   productService: text('product_service'),
   valueProposition: text('value_proposition'),

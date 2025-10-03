@@ -43,9 +43,9 @@ async function callOpenAI(params: OpenAI.Chat.ChatCompletionCreateParams, fallba
 // Safe JSON parser with comprehensive error handling
 function safeJsonParse(content: string, fallback: Record<string, unknown>): Record<string, unknown> {
   try {
-    // Clean control characters and common issues
+    // Clean problematic characters but preserve whitespace
     const cleaned = content
-      .replace(/[\x00-\x1F\x7F]/g, '') // Remove control characters
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove control chars but keep \n (0x0A) and \r (0x0D) and \t (0x09)
       .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
       .trim();
 
@@ -257,12 +257,17 @@ VARIANT 3 - "EVIDENCE-DRIVEN CLOSER"
 
 REQUIREMENTS FOR EACH VARIANT:
 - Natural, conversational flow (NO section breaks)
+- Include prospect's name and company naturally (use placeholders like [First Name] if not provided)
+- Reference objection naturally and smoothly - NEVER copy-paste objection text verbatim, integrate the concept naturally
 - Specific industry knowledge and market insights
 - Credible metrics and proof points
 - Confident, expert positioning
 - 150-250 words each
-- Include prospect's name if provided
 - Build toward natural next step
+- STRUCTURE NATURALLY based on your approach - don't force identical formatting across variants
+- Executive Challenger: Should feel direct and insight-driven
+- Consultative Partner: Should feel question-based and collaborative
+- Evidence-Driven Closer: Should feel data-heavy and ROI-focused
 
 OUTPUT FORMAT:
 [
@@ -507,13 +512,17 @@ VARIANT 3 - "URGENCY CATALYST"
 
 REQUIREMENTS FOR EACH VARIANT:
 - Natural, conversational tone (no obvious sales language)
-- Include prospect's name and company naturally
-- Reference trigger authentically
+- Include prospect's name and company naturally (use placeholders like [First Name] if not provided)
+- Reference trigger naturally and smoothly - NEVER copy-paste trigger text verbatim, integrate the concept naturally
 - Demonstrate deep industry knowledge
 - Use specific, credible metrics (no vague claims)
 - Strong, value-driven CTA (not "quick chat")
 - Appropriate length for ${messageType}
 - Build toward meaningful business conversation
+- STRUCTURE NATURALLY based on your approach - don't force identical formatting across variants
+- Market Intelligence: Should feel data-driven and analytical
+- Peer Advisor: Should feel conversational and relationship-focused
+- Urgency Catalyst: Should feel direct and action-oriented
 
 OUTPUT FORMAT:
 [
@@ -540,53 +549,33 @@ OUTPUT FORMAT:
   }
 ]`;
 
-  // Sophisticated fallback messages
+  // Improved fallback messages with natural language
   const getFallbackMessages = () => {
     const name = prospectInfo.name || 'there';
-    const company = prospectInfo.company || 'your organization';
-    const title = prospectInfo.title || icp.role;
+    const company = prospectInfo.company || 'your company';
+    const title = prospectInfo.title || icp.role || 'executive';
 
     return [
       {
         variant: "Market Intelligence Leader",
         approach: "Lead with exclusive market insight",
         bestFor: "Senior executives who value strategic insights",
-        subject: `${company}'s competitive advantage window in ${icp.industry}`,
-        message: `${name}, I've been tracking an interesting pattern in ${icp.industry} that directly impacts ${company}'s market position. Over the past 6 months, I've worked with 47 ${icp.role}s at similar-stage companies, and there's a clear divide emerging between those who implemented AI-native solutions in Q1 versus those still evaluating.
-
-The data is compelling: companies that moved early are seeing 40-60% better performance metrics than their competitors who waited. More specifically, ${title}s dealing with ${icp.painPoints[0]} are achieving breakthrough results that seemed impossible just 12 months ago.
-
-Given ${trigger.toLowerCase()}, ${company} is positioned to be either ahead of this curve or behind it. The market window for first-mover advantage is closing faster than most realize - I'm seeing deals that took 6 months to close in 2023 now happening in 6 weeks because the competitive pressure is real.
-
-I'd like to share the specific intelligence I'm seeing and how it applies to ${company}'s situation. Worth a strategic conversation about positioning ${company} ahead of this market shift?`
+        subject: `Market trends impacting ${company}`,
+        message: `Hi ${name}, I've been analyzing trends in the ${icp.industry} space that are creating new opportunities for companies like ${company}. Organizations that are proactively addressing ${icp.painPoints[0] || 'operational challenges'} are gaining significant competitive advantages. I'd like to share some specific market intelligence that could be relevant to your strategic planning. Would you be interested in a brief conversation about what I'm seeing in the market?`
       },
       {
         variant: "Peer Advisor Approach",
         approach: "Share relevant proven results",
         bestFor: "VPs and Directors who value proven results",
-        subject: `How [Similar ${icp.industry} Company] solved ${icp.painPoints[0]}`,
-        message: `${name}, ${trigger.toLowerCase()} reminded me of a conversation I had with another ${title} at a similar ${icp.industry} company last quarter. They were facing the exact same challenge with ${icp.painPoints[0]} that I imagine ${company} is experiencing.
-
-Six months later, their results speak for themselves: 65% reduction in time spent on manual processes, 45% improvement in team productivity, and $400K in documented ROI. What made the difference wasn't just the technology - it was the strategic implementation approach we developed specifically for ${icp.industry} companies scaling from ${icp.companySize.split('-')[0]} to ${icp.companySize.split('-')[1]} employees.
-
-The ${title} told me the key was getting ahead of the scaling challenge before it became a crisis. Looking at ${company}'s trajectory, you're at the exact inflection point where this type of solution delivers maximum impact.
-
-I'm curious about your perspective on ${icp.painPoints[0]} and whether you're seeing similar patterns. The approach that worked for them might be highly relevant to ${company}'s situation. Would you be open to a peer-level conversation about what we learned and how it might apply to your specific context?`
+        subject: `Success story from similar ${icp.industry} company`,
+        message: `Hi ${name}, I recently worked with another ${title} at a ${icp.industry} company facing similar challenges around ${icp.painPoints[0] || 'growth scaling'}. The results they achieved were impressive, and the approach might be relevant to ${company}'s situation. I'm curious about your perspective on these challenges and whether you'd be open to a peer-level conversation about what worked for them?`
       },
       {
         variant: "Urgency Catalyst",
         approach: "Create genuine urgency through timing",
         bestFor: "Decision makers under growth pressure",
-        subject: `Time-sensitive opportunity for ${company} - Q4 positioning`,
-        message: `${name}, ${trigger.toLowerCase()} caught my attention because of the timing implications for ${company}. Based on my work with ${icp.role}s in similar growth phases, there's a critical 90-day window where decisions like this either accelerate growth or create competitive disadvantage.
-
-Here's what I'm seeing: companies in ${icp.industry} that implement solutions for ${icp.painPoints[0]} in Q4 start the new year with 40-50% better performance than competitors who wait until Q1. The reason? They capture the full benefit during peak performance periods while their competitors are still evaluating.
-
-More urgently, your closest competitors are already moving. Without naming names, I can tell you that similar companies in your space have been implementing AI-native solutions throughout 2024. The gap between early adopters and late adopters is widening every quarter.
-
-For ${company}, the cost of waiting another quarter isn't just the ongoing inefficiency - it's the opportunity cost of letting competitors establish market advantage while you're still manually handling ${icp.painPoints[0]}.
-
-I have a specific 90-day implementation plan that's delivered measurable results within 60 days for companies exactly like ${company}. Given the timing and competitive factors, this deserves immediate attention. Can we schedule a strategic discussion this week to review the implementation timeline and projected impact for ${company}?`
+        subject: `Time-sensitive opportunity for ${company}`,
+        message: `Hi ${name}, I'm reaching out because of some timing-sensitive factors I'm seeing in the ${icp.industry} market. Companies that address ${icp.painPoints[0] || 'scaling challenges'} in the next 90 days are positioning themselves ahead of competitors who wait until next quarter. Given ${company}'s growth trajectory, this timing could be critical. Would you have 15 minutes this week to discuss the competitive landscape and timing considerations?`
       }
     ];
   };
@@ -599,6 +588,7 @@ I have a specific 90-day implementation plan that's delivered measurable results
     temperature: 0.4,
     max_tokens: 1500,
   }, fallbackMessages as unknown as Record<string, unknown>);
+
 
   return safeJsonParse(typeof messagesContent === 'string' ? messagesContent : JSON.stringify(messagesContent), fallbackMessages as unknown as Record<string, unknown>) as any;
 }

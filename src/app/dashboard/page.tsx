@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useUser } from '@/hooks/use-user';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,7 @@ interface RecentOutput {
 }
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession();
+  const { user, loading } = useUser();
   const router = useRouter();
   const { icps, selectedIcp, selectedIcpId, setSelectedIcpId, isLoading: isLoadingICPs } = useICP();
   const [userUsage, setUserUsage] = useState(0);
@@ -36,8 +36,11 @@ export default function DashboardPage() {
 useEffect(() => {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('upgrade') === 'success') {
-    // Force refresh data after upgrade
-    window.location.reload();
+    // Show success toast and clean up URL
+    toast.success('🎉 Welcome to Pro! Enjoy unlimited access to all tools.');
+    // Clean up the URL without reloading
+    const newUrl = window.location.pathname;
+    window.history.replaceState({}, document.title, newUrl);
   }
 
   // Check if milestone banner was previously dismissed
@@ -48,14 +51,14 @@ useEffect(() => {
 }, []);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (!loading && !user) {
       router.push('/login');
     }
-  }, [status, router]);
+  }, [loading, user, router]);
 
   useEffect(() => {
     const fetchData = () => {
-      if (session) {
+      if (user) {
         // Fetch usage data
         fetch('/api/user/usage')
           .then(res => res.json())
@@ -104,7 +107,7 @@ useEffect(() => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', fetchData);
     };
-  }, [session]);
+  }, [user]);
 
   const handleUpgrade = async () => {
     setIsUpgrading(true);
@@ -151,8 +154,23 @@ useEffect(() => {
 
       if (response.ok) {
         toast.success('Saved to library!');
-        // Refresh the data to show updated state
-        fetchData();
+        // Refresh the recent outputs data
+        if (user) {
+          Promise.all([
+            fetch('/api/outputs'),
+            fetch('/api/outputs/temporary')
+          ])
+          .then(([savedRes, tempRes]) => Promise.all([savedRes.json(), tempRes.json()]))
+          .then(([savedData, tempData]) => {
+            const savedOutputs = (savedData.outputs || []).map((o: RecentOutput) => ({...o, isSaved: true}));
+            const tempOutputs = (tempData.outputs || []).map((o: RecentOutput) => ({...o, isTemporary: true}));
+            const allOutputs = [...savedOutputs, ...tempOutputs]
+              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+              .slice(0, 8);
+            setRecentOutputs(allOutputs);
+          })
+          .catch(console.error);
+        }
       } else {
         toast.error('Failed to save to library');
       }
@@ -161,11 +179,11 @@ useEffect(() => {
     }
   };
 
-  if (status === 'loading') {
+  if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
-  if (!session) {
+  if (!user) {
     return null;
   }
 

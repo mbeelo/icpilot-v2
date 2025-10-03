@@ -1,15 +1,31 @@
 'use client';
 
-import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/lib/supabase';
+import { User } from '@supabase/supabase-js';
 
 export function AppNav() {
-  const { data: session } = useSession();
+  const [user, setUser] = useState<User | null>(null);
   const pathname = usePathname();
+  const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
+
+  useEffect(() => {
+    // Get initial user
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const isActive = (path: string) => pathname === path;
 
@@ -89,7 +105,7 @@ export function AppNav() {
           {/* User Menu */}
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-700 hidden md:block">
-              {session?.user?.name}
+              {user?.user_metadata?.name || user?.email}
             </span>
             <Button
               variant="outline"
@@ -97,8 +113,8 @@ export function AppNav() {
               onClick={async () => {
                 setIsSigningOut(true);
                 try {
-                  await signOut({ redirect: false });
-                  window.location.href = '/login';
+                  await supabase.auth.signOut();
+                  router.push('/login');
                 } catch (error) {
                   console.error('Sign out error:', error);
                   setIsSigningOut(false);

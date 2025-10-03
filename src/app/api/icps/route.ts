@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, icps } from '@/db';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { getCurrentUser } from '@/lib/session';
 
 export async function GET() {
@@ -34,23 +34,52 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     
-    const newIcp = await db.insert(icps).values({
-      userId: user.id,
-      name: body.name,
-      industry: body.industry,
-      companySize: body.companySize,
-      role: body.role,
-      painPoints: body.painPoints ? body.painPoints.split(',').map((p: string) => p.trim()).filter(Boolean) : [],
-      outcomes: body.outcomes ? body.outcomes.split(',').map((o: string) => o.trim()).filter(Boolean) : [],
-      triggers: body.triggers ? body.triggers.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
-      dealKillers: [],
-      // New company/value prop fields
-      companyName: body.companyName,
-      productService: body.productService,
-      valueProposition: body.valueProposition,
-      keyDifferentiators: body.keyDifferentiators ? body.keyDifferentiators.split(',').map((d: string) => d.trim()).filter(Boolean) : [],
-    }).returning();
+    // Helper function to safely parse array data
+    const parseArrayField = (field: any): string[] => {
+      if (!field) return [];
+      if (Array.isArray(field)) return field;
+      if (typeof field === 'string') {
+        try {
+          // Try to parse as JSON first
+          const parsed = JSON.parse(field);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch {
+          // Fall back to comma-separated string
+          return field.split(',').map((item: string) => item.trim()).filter(Boolean);
+        }
+      }
+      return [];
+    };
+
+    // Convert arrays to PostgreSQL format using sql.raw
+    const painPointsArray = parseArrayField(body.painPoints);
+    const outcomesArray = parseArrayField(body.outcomes);
+    const triggersArray = parseArrayField(body.triggers);
+    const dealKillersArray = parseArrayField(body.dealKillers);
+    const keyDifferentiatorsArray = parseArrayField(body.keyDifferentiators);
+
+    // Use manual SQL query with proper array handling
+    const newIcp = await db.execute(sql`
+      INSERT INTO icps (user_id, name, industry, company_size, role, pain_points, outcomes, triggers, deal_killers, company_name, product_service, value_proposition, key_differentiators)
+      VALUES (
+        ${user.id},
+        ${body.name},
+        ${body.industry},
+        ${body.companySize},
+        ${body.role},
+        ${painPointsArray.length > 0 ? sql.raw(`ARRAY[${painPointsArray.map(item => `'${item.replace(/'/g, "''")}'`).join(',')}]`) : sql`ARRAY[]::text[]`},
+        ${outcomesArray.length > 0 ? sql.raw(`ARRAY[${outcomesArray.map(item => `'${item.replace(/'/g, "''")}'`).join(',')}]`) : sql`ARRAY[]::text[]`},
+        ${triggersArray.length > 0 ? sql.raw(`ARRAY[${triggersArray.map(item => `'${item.replace(/'/g, "''")}'`).join(',')}]`) : sql`ARRAY[]::text[]`},
+        ${dealKillersArray.length > 0 ? sql.raw(`ARRAY[${dealKillersArray.map(item => `'${item.replace(/'/g, "''")}'`).join(',')}]`) : sql`ARRAY[]::text[]`},
+        ${body.companyName},
+        ${body.productService},
+        ${body.valueProposition},
+        ${keyDifferentiatorsArray.length > 0 ? sql.raw(`ARRAY[${keyDifferentiatorsArray.map(item => `'${item.replace(/'/g, "''")}'`).join(',')}]`) : sql`ARRAY[]::text[]`}
+      )
+      RETURNING *
+    `);
     
+    // Return the newly created ICP
     return NextResponse.json({ success: true, icp: newIcp[0] });
   } catch (error) {
     console.error('Error saving ICP:', error);

@@ -1,7 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { supabase } from '@/lib/supabase';
+import { User } from '@supabase/supabase-js';
 
 interface ICP {
   id: string;
@@ -26,15 +27,30 @@ interface ICPContextType {
 const ICPContext = createContext<ICPContextType | undefined>(undefined);
 
 export function ICPProvider({ children }: { children: React.ReactNode }) {
-  const { data: session } = useSession();
+  const [user, setUser] = useState<User | null>(null);
   const [icps, setIcps] = useState<ICP[]>([]);
   const [selectedIcpId, setSelectedIcpId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
 
   const selectedIcp = icps.find(icp => icp.id === selectedIcpId) || null;
 
+  // Set up Supabase auth listener
+  useEffect(() => {
+    // Get initial user
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const refreshIcps = async () => {
-    if (!session) return;
+    if (!user) return;
 
     setIsLoading(true);
     try {
@@ -45,8 +61,16 @@ export function ICPProvider({ children }: { children: React.ReactNode }) {
       }
 
       const response = await fetch('/api/icps');
+
+      if (!response.ok) {
+        // Handle error responses (401, 500, etc)
+        setIcps([]);
+        return;
+      }
+
       const data = await response.json();
-      const icpArray = data.icps || data || [];
+      const icpArray = Array.isArray(data.icps) ? data.icps :
+                       Array.isArray(data) ? data : [];
       setIcps(icpArray);
 
       // Validate saved ICP selection
@@ -73,10 +97,10 @@ export function ICPProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    if (session) {
+    if (user) {
       refreshIcps();
     }
-  }, [session]);
+  }, [user]);
 
   const contextValue: ICPContextType = {
     icps,

@@ -20,8 +20,8 @@ ICP Pilot v2 is a B2B sales enablement platform that helps sales teams create id
 
 ### Tech Stack
 - **Framework**: Next.js 15 with App Router and TypeScript
-- **Database**: PostgreSQL (Neon) with Drizzle ORM
-- **Authentication**: NextAuth.js with credentials provider
+- **Database**: PostgreSQL (Supabase) with Drizzle ORM
+- **Authentication**: Supabase Auth with server-side session management
 - **AI Integration**: OpenAI GPT-4 for content generation
 - **Payments**: Stripe for subscription management
 - **Styling**: Tailwind CSS v4
@@ -35,17 +35,19 @@ ICP Pilot v2 is a B2B sales enablement platform that helps sales teams create id
 5. **Output Library** (`/library`): Save and manage generated sales content
 
 ### Database Schema
-Located in `src/db/schema.ts` with four main tables:
+Located in `src/db/schema.ts` with six main tables:
 - **users**: User accounts with subscription info and usage tracking
-- **icps**: Ideal customer profiles with industry, role, pain points, etc.
+- **icps**: Ideal customer profiles with industry, role, pain points, etc. (uses PostgreSQL arrays)
 - **outputs**: Generated content (objections, messages, frameworks)
 - **usageLogs**: Feature usage tracking for analytics
+- **blogPosts**: Blog content management
+- **supportRequests**: User feedback and bug reports
 
 ### Authentication & Authorization
-- NextAuth.js configuration in `src/lib/auth.ts`
-- Credential-based authentication with bcrypt password hashing
+- Supabase Auth configuration with server-side session management
+- Session handling in `src/lib/session.ts` using `getCurrentUser()`
 - Protected routes defined in `middleware.ts`
-- JWT session strategy
+- Cookie-based authentication with Supabase client
 
 ### AI Content Generation
 All AI functions are in `src/lib/openai.ts`:
@@ -72,9 +74,11 @@ All AI functions are in `src/lib/openai.ts`:
 - `src/db/schema.ts`: Complete database schema definitions
 
 ### Authentication
-- `src/lib/auth.ts`: NextAuth configuration
-- `src/app/api/auth/[...nextauth]/route.ts`: Auth API routes
-- `src/app/providers.tsx`: SessionProvider wrapper
+- `src/lib/session.ts`: Supabase session management
+- `src/lib/supabase.ts`: Supabase client configuration
+- `src/lib/supabase-server.ts`: Server-side Supabase client
+- `src/app/auth/`: Authentication pages (login, register)
+- `src/components/auth/`: Authentication components
 
 ### API Routes
 - `src/app/api/icps/`: ICP CRUD operations
@@ -98,12 +102,13 @@ All AI functions are in `src/lib/openai.ts`:
 
 ### Database Operations
 - Use Drizzle ORM for all database operations
-- Connection is set up in `src/db/index.ts` using Neon serverless
+- Connection is set up in `src/db/index.ts` using Supabase PostgreSQL
 - Run `npx drizzle-kit push` after schema changes
 - All queries should use the exported `db` instance and schema types
+- **Important**: Arrays should use `text().array()` for PostgreSQL compatibility, not JSONB
 
 ### API Route Patterns
-- Check authentication first: `const session = await getServerSession(authOptions)`
+- Check authentication first: `const user = await getCurrentUser()`
 - Validate user permissions and subscription limits
 - Use `checkAndIncrementUsage()` for feature usage tracking
 - Return proper HTTP status codes and error messages
@@ -123,9 +128,11 @@ All AI functions are in `src/lib/openai.ts`:
 - Handle loading and error states appropriately
 
 ### Environment Variables Required
-- `DATABASE_URL`: Neon PostgreSQL connection string
-- `NEXTAUTH_SECRET`: NextAuth.js secret for JWT signing
-- `NEXTAUTH_URL`: Application URL for callbacks
+- `DATABASE_URL`: Supabase PostgreSQL connection string
+- `NEXT_PUBLIC_SUPABASE_URL`: Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase anonymous key
 - `OPENAI_API_KEY`: OpenAI API key for content generation
 - `STRIPE_SECRET_KEY`: Stripe secret key for payments
+- `STRIPE_PRICE_ID_PRO`: Stripe price ID for Pro subscription
 - `STRIPE_WEBHOOK_SECRET`: Stripe webhook endpoint secret
+- `NODE_ENV`: Environment (development/production)

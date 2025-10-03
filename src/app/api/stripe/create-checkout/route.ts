@@ -24,8 +24,8 @@ export async function POST() {
         },
       ],
       mode: 'subscription',
-      success_url: `${process.env.NEXTAUTH_URL}/dashboard?upgrade=success`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/dashboard?upgrade=cancelled`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://icppilot.com'}/dashboard?upgrade=success`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://icppilot.com'}/dashboard?upgrade=cancelled`,
       metadata: {
         userId: user.id,
       },

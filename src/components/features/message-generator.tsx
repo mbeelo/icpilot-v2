@@ -748,54 +748,83 @@ export function MessageGenerator() {
 
       {/* Results - 3 World-Class Message Variants */}
       {messages.length > 0 && (
-        <div className="space-y-6">
-          <Card className="border-2">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-2xl text-green-800 text-center">
-                  ✉️ Your Expert Message Variants
-                </CardTitle>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={copyAllMessages}
-                >
-                  📋 Copy All
-                </Button>
-              </div>
-              <p className="text-center text-green-700">3 world-class message variants demonstrating sales expertise</p>
-            </CardHeader>
-          </Card>
-
-          {messages.map((message, index) => (
-            <div className="border-l-4 border-blue-500 pl-4 py-2">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h4 className="font-semibold text-blue-700 mb-2">{message.variant}</h4>
-                  <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">{message.approach}</span>
-                  <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded ml-2">{message.bestFor}</span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => copyToClipboard(message)}
-                >
-                  📋 Copy
-                </Button>
-              </div>
-              <div className="space-y-6">
-                <div className="border-l-4 border-gray-400 pl-4 py-2">
-                  <h4 className="font-semibold text-blue-700 mb-2">Subject Line:</h4>
-                  <p className="text-gray-800">{message.subject}</p>
-                </div>
-                <div className="border-l-4 border-gray-400 pl-4 py-2">
-                  <h4 className="font-semibold text-blue-700 mb-2">Message:</h4>
-                  <p className="text-gray-800 leading-relaxed whitespace-pre-line">{message.message}</p>
-                </div>
-              </div>
+        <Card className="border-2 border-gray-200">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-2xl text-green-800">
+                ✉️ Your Expert Message Variants
+              </CardTitle>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={copyAllMessages}
+              >
+                📋 Copy All
+              </Button>
             </div>
-          ))}
-        </div>
+            <p className="text-green-700">3 world-class message variants demonstrating sales expertise</p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {messages.map((message, index) => {
+              // Get colors based on variant name to match home screen
+              const getVariantColors = (variant: string) => {
+                if (variant.includes('Peer Advisor')) {
+                  return {
+                    border: 'border-green-500',
+                    text: 'text-green-700',
+                    bg: 'bg-green-100'
+                  };
+                } else if (variant.includes('Urgency Catalyst')) {
+                  return {
+                    border: 'border-purple-500',
+                    text: 'text-purple-700',
+                    bg: 'bg-purple-100'
+                  };
+                } else {
+                  // Market Intelligence Leader (default)
+                  return {
+                    border: 'border-blue-500',
+                    text: 'text-blue-700',
+                    bg: 'bg-blue-100'
+                  };
+                }
+              };
+
+              const colors = getVariantColors(message.variant);
+
+              return (
+              <div key={index} className={`border-l-4 ${colors.border} pl-4 py-2`}>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h4 className={`font-semibold ${colors.text} mb-2`}>{message.variant}</h4>
+                    <div className="flex gap-2">
+                      <span className={`px-2 py-1 ${colors.bg} ${colors.text} text-xs font-medium rounded`}>{message.approach}</span>
+                      <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded">{message.bestFor}</span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard(message)}
+                  >
+                    📋 Copy
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  <div className="border-l-4 border-gray-400 pl-4 py-2">
+                    <h4 className={`font-semibold ${colors.text} mb-2`}>Subject Line:</h4>
+                    <p className="text-gray-800">{message.subject}</p>
+                  </div>
+                  <div className="border-l-4 border-gray-400 pl-4 py-2">
+                    <h4 className={`font-semibold ${colors.text} mb-2`}>Message:</h4>
+                    <p className="text-gray-800 leading-relaxed whitespace-pre-line">{message.message}</p>
+                  </div>
+                </div>
+              </div>
+              );
+            })}
+          </CardContent>
+        </Card>
       )}
 
       <UpgradeModal

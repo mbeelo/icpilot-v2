@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useUser } from '@/hooks/use-user';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { AppLayout } from '@/components/layout/app-layout';
 import toast from 'react-hot-toast';
 
 export default function AccountPage() {
-  const { data: session, status } = useSession();
+  const { user, loading } = useUser();
   const router = useRouter();
   const [userData, setUserData] = useState<{
     usageCount: number;
@@ -23,10 +23,10 @@ export default function AccountPage() {
   const [isUpgrading, setIsUpgrading] = useState(false);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (!loading && !user) {
       router.push('/login');
     }
-  }, [status, router]);
+  }, [loading, user, router]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -43,10 +43,10 @@ export default function AccountPage() {
       }
     };
 
-    if (session) {
+    if (user) {
       fetchUserData();
     }
-  }, [session]);
+  }, [user]);
 
   const handleUpgrade = async () => {
     setIsUpgrading(true);
@@ -98,7 +98,7 @@ export default function AccountPage() {
     );
   }
 
-  if (!session || !userData) {
+  if (!user || !userData) {
     return null;
   }
 
@@ -120,11 +120,11 @@ export default function AccountPage() {
           <CardContent className="space-y-4">
             <div>
               <label className="text-sm font-medium text-gray-700">Name</label>
-              <p className="text-gray-900">{session.user?.name}</p>
+              <p className="text-gray-900">{user?.user_metadata?.name || user?.email}</p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-700">Email</label>
-              <p className="text-gray-900">{session.user?.email}</p>
+              <p className="text-gray-900">{user?.email}</p>
             </div>
           </CardContent>
         </Card>
