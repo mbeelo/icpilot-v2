@@ -206,7 +206,7 @@ export function ObjectionKiller() {
     const pollForCompletion = () => {
       const status = checkForRecentRequests(
         'objection',
-        (result: any) => {
+        (result: ObjectionResponse[] | { rebuttal: ObjectionResponse[] }) => {
           // Found completed request - rebuttal is directly in result from API response
           setResponses(result.rebuttal || result);
           setGeneratedObjection(objection || customObjection);
@@ -251,7 +251,7 @@ export function ObjectionKiller() {
   useEffect(() => {
     const status = checkForRecentRequests(
       'objection',
-      (result: any) => {
+      (result: ObjectionResponse[] | { rebuttal: ObjectionResponse[] }) => {
         // Found completed request - rebuttal is directly in result from API response
         setResponses(result.rebuttal || result);
         setGeneratedObjection(objection || customObjection);
@@ -377,7 +377,7 @@ export function ObjectionKiller() {
             <div className="text-6xl mb-4">🚀</div>
             <h3 className="text-2xl font-semibold text-gray-900 mb-2">Ready to create world-class objection rebuttals?</h3>
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              First, let's create your Ideal Customer Profile so we can generate rebuttals that are perfectly tailored to your target buyers.
+              First, let&apos;s create your Ideal Customer Profile so we can generate rebuttals that are perfectly tailored to your target buyers.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Button size="lg" onClick={() => window.location.href = '/icp-builder'} className="bg-blue-600 hover:bg-blue-700">
@@ -396,7 +396,7 @@ export function ObjectionKiller() {
         <Card className="border-green-200 bg-green-50">
           <CardHeader>
             <CardTitle className="text-xl text-green-800 text-center">
-              🎯 Here's what you'll be able to generate:
+              🎯 Here&apos;s what you&apos;ll be able to generate:
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -441,7 +441,7 @@ export function ObjectionKiller() {
               )}
               {showCollapsedForm && (
                 <p className="text-sm text-gray-500">
-                  "{generatedObjection}"
+                  &quot;{generatedObjection}&quot;
                 </p>
               )}
             </div>
@@ -520,7 +520,7 @@ export function ObjectionKiller() {
                     }
                   }}
                 >
-                  "{preset}"
+                  &quot;{preset}&quot;
                 </button>
               ))}
             </div>
@@ -736,7 +736,7 @@ export function ObjectionKiller() {
             </Button>
             {(objection || customObjection) && (
               <p className="text-center text-sm text-gray-500 mt-2">
-                Generating rebuttal for: "{objection || customObjection}"
+                Generating rebuttal for: &quot;{objection || customObjection}&quot;
               </p>
             )}
           </div>

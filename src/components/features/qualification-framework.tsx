@@ -126,7 +126,7 @@ export function QualificationFramework() {
     const pollForCompletion = () => {
       const status = checkForRecentRequests(
         'framework',
-        (result: any) => {
+        (result: { framework: QualificationFramework }) => {
           // Found completed request
           setFramework(result.framework);
           setShowCollapsedForm(true);
@@ -171,7 +171,7 @@ export function QualificationFramework() {
   useEffect(() => {
     const status = checkForRecentRequests(
       'framework',
-      (result: any) => {
+      (result: { framework: QualificationFramework }) => {
         // Found completed request
         setFramework(result.framework);
         setShowCollapsedForm(true);
@@ -323,7 +323,7 @@ export function QualificationFramework() {
             <div className="text-6xl mb-4">🎯</div>
             <h3 className="text-2xl font-semibold text-gray-900 mb-2">Ready to create world-class qualification frameworks?</h3>
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              First, let's create your Ideal Customer Profile so we can generate frameworks that demonstrate true sales expertise.
+              First, let&apos;s create your Ideal Customer Profile so we can generate frameworks that demonstrate true sales expertise.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Button size="lg" onClick={() => window.location.href = '/icp-builder'} className="bg-blue-600 hover:bg-blue-700">
@@ -357,7 +357,7 @@ export function QualificationFramework() {
         <Card className="border-green-200 bg-green-50">
           <CardHeader>
             <CardTitle className="text-xl text-green-800 text-center">
-              🏆 Here's what you'll be able to generate:
+              🏆 Here&apos;s what you&apos;ll be able to generate:
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -949,7 +949,7 @@ export function QualificationFramework() {
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="bg-white p-4 rounded-lg border-l-4 border-blue-500">
                   <h4 className="font-semibold text-blue-700 mb-2">Strategic Discovery</h4>
-                  <p className="text-gray-600 text-sm">While competitors ask about budget and timeline, you're uncovering business transformation opportunities</p>
+                  <p className="text-gray-600 text-sm">While competitors ask about budget and timeline, you&apos;re uncovering business transformation opportunities</p>
                 </div>
                 <div className="bg-white p-4 rounded-lg border-l-4 border-green-500">
                   <h4 className="font-semibold text-green-700 mb-2">Executive Positioning</h4>
@@ -961,7 +961,7 @@ export function QualificationFramework() {
                 </div>
               </div>
               <div className="text-center pt-4">
-                <p className="text-yellow-800 font-medium">Result: You're positioned as a strategic advisor, not just another vendor</p>
+                <p className="text-yellow-800 font-medium">Result: You&apos;re positioned as a strategic advisor, not just another vendor</p>
               </div>
             </CardContent>
           </Card>

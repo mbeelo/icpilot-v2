@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       'objection',
       `Objection: "${objection}"`,
       { objection, objectionType, prospectInfo, salesContext },
-      rebuttal
+      rebuttal as Record<string, unknown>
     );
     // Increment objections counter
 await db.update(users)

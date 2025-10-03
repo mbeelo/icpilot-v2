@@ -88,7 +88,7 @@ export default function AccountPage() {
     }
   };
 
-  if (status === 'loading' || isLoading) {
+  if (loading || isLoading) {
     return (
       <AppLayout>
         <div className="max-w-4xl mx-auto p-6">

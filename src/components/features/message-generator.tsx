@@ -200,7 +200,7 @@ export function MessageGenerator() {
     const pollForCompletion = () => {
       const status = checkForRecentRequests(
         'message',
-        (result: any) => {
+        (result: { messages: MessageOutput[] }) => {
           // Found completed request
           setMessages(result.messages);
           setGeneratedTrigger(trigger || customTrigger);
@@ -245,7 +245,7 @@ export function MessageGenerator() {
   useEffect(() => {
     const status = checkForRecentRequests(
       'message',
-      (result: any) => {
+      (result: { messages: MessageOutput[] }) => {
         // Found completed request
         setMessages(result.messages);
         setGeneratedTrigger(trigger || customTrigger);
@@ -373,7 +373,7 @@ export function MessageGenerator() {
             <div className="text-6xl mb-4">🚀</div>
             <h3 className="text-2xl font-semibold text-gray-900 mb-2">Ready to create world-class outreach messages?</h3>
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              First, let's create your Ideal Customer Profile so we can generate messages that demonstrate true sales expertise.
+              First, let&apos;s create your Ideal Customer Profile so we can generate messages that demonstrate true sales expertise.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Button size="lg" onClick={() => window.location.href = '/icp-builder'} className="bg-blue-600 hover:bg-blue-700">
@@ -392,7 +392,7 @@ export function MessageGenerator() {
         <Card className="border-green-200 bg-green-50">
           <CardHeader>
             <CardTitle className="text-xl text-green-800 text-center">
-              🎯 Here's what you'll be able to generate:
+              🎯 Here&apos;s what you&apos;ll be able to generate:
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -437,7 +437,7 @@ export function MessageGenerator() {
               )}
               {showCollapsedForm && (
                 <p className="text-sm text-gray-500">
-                  {messageType} • "{generatedTrigger}"
+                  {messageType} • &quot;{generatedTrigger}&quot;
                 </p>
               )}
             </div>
@@ -707,7 +707,7 @@ export function MessageGenerator() {
             </Button>
             {(trigger || customTrigger) && messageType && (
               <p className="text-center text-sm text-gray-500 mt-2">
-                Generating {messageType.toLowerCase()} for: "{trigger || customTrigger}"
+                Generating {messageType.toLowerCase()} for: &quot;{trigger || customTrigger}&quot;
               </p>
             )}
           </div>

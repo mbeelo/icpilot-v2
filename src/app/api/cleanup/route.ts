@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: `Cleaned up temporary outputs older than 7 days`,
-      deletedCount: result.rowCount || 0
+      deletedCount: (result as any).rowCount || 0
     });
 
   } catch (error) {

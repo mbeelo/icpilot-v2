@@ -43,9 +43,12 @@ async function callOpenAI(params: OpenAI.Chat.ChatCompletionCreateParams, fallba
 // Safe JSON parser with comprehensive error handling
 function safeJsonParse(content: string, fallback: Record<string, unknown>): Record<string, unknown> {
   try {
-    // Clean problematic characters but preserve whitespace
+    // More aggressive cleaning for JSON parsing
     const cleaned = content
       .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove control chars but keep \n (0x0A) and \r (0x0D) and \t (0x09)
+      .replace(/\n/g, '\\n') // Escape actual newlines in JSON strings
+      .replace(/\r/g, '\\r') // Escape carriage returns
+      .replace(/\t/g, '\\t') // Escape tabs
       .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
       .trim();
 
