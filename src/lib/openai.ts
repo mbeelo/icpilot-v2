@@ -328,7 +328,7 @@ OUTPUT FORMAT:
     max_tokens: 1500,
   }, fallbackResponses as unknown as Record<string, unknown>);
 
-  return safeJsonParse(typeof responsesContent === 'string' ? responsesContent : JSON.stringify(responsesContent), fallbackResponses as unknown as Record<string, unknown>) as any;
+  return safeJsonParse(typeof responsesContent === 'string' ? responsesContent : JSON.stringify(responsesContent), fallbackResponses as unknown as Record<string, unknown>) as unknown;
 }
 
 export async function generateMessages(icp: ICPData, messageType: string, trigger: string, prospectInfo: {
@@ -590,10 +590,10 @@ OUTPUT FORMAT:
   }, fallbackMessages as unknown as Record<string, unknown>);
 
 
-  return safeJsonParse(typeof messagesContent === 'string' ? messagesContent : JSON.stringify(messagesContent), fallbackMessages as unknown as Record<string, unknown>) as any;
+  return safeJsonParse(typeof messagesContent === 'string' ? messagesContent : JSON.stringify(messagesContent), fallbackMessages as unknown as Record<string, unknown>) as unknown;
 }
 
-export async function generateQualificationFramework(icp: ICPData, frameworkType: string, customContext?: string, qualificationContext?: any) {
+export async function generateQualificationFramework(icp: ICPData, frameworkType: string, customContext?: string, qualificationContext?: Record<string, unknown>) {
   // World-class sales qualification expert system
   const expertSystemPrompt = `You are a world-class B2B sales qualification expert with 25+ years of enterprise sales experience and over $1B in qualified pipeline. You specialize in sophisticated discovery methodologies that uncover true buying intent and decision-making dynamics.
 
@@ -761,5 +761,5 @@ Return ONLY valid JSON:
     max_tokens: 1200,
   }, fallbackFramework as Record<string, unknown>);
 
-  return safeJsonParse(typeof frameworkContent === 'string' ? frameworkContent : JSON.stringify(frameworkContent), fallbackFramework) as any;
+  return safeJsonParse(typeof frameworkContent === 'string' ? frameworkContent : JSON.stringify(frameworkContent), fallbackFramework) as unknown;
 }

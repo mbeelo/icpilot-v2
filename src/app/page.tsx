@@ -4,7 +4,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "ICP Pilot - AI-Powered Sales Enablement Platform | Turn Every Rep Into a Top Performer",
-  description: "Stop wasting 60+ hours weekly recreating sales content. ICP Pilot's AI generates personalized objection rebuttals, cold messages, and discovery frameworks based on proven methodologies like Sandler, Challenger, and SPIN selling.",
+  description: "Stop wasting 60+ hours weekly recreating sales content. ICP Pilot&apos;s AI generates personalized objection rebuttals, cold messages, and discovery frameworks based on proven methodologies like Sandler, Challenger, and SPIN selling.",
   keywords: [
     "sales enablement platform",
     "AI sales tools",
@@ -110,7 +110,7 @@ export default function HomePage() {
             <span className="text-blue-600">In Under 30 Seconds</span>
           </h1>
           <p className="text-xl text-gray-600 mb-4 leading-relaxed">
-            While your competitors spend hours writing one email, you'll generate 3 expert-level objection rebuttals,
+            While your competitors spend hours writing one email, you&apos;ll generate 3 expert-level objection rebuttals,
             personalized cold messages, and qualification frameworks that outperform 90% of sales reps.
           </p>
           <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-lg">
@@ -132,7 +132,7 @@ export default function HomePage() {
               ✅ 5 free outputs • ✅ No credit card required • ✅ 2-minute setup
             </p>
             <p className="text-xs text-gray-500">
-              Join 500+ sales teams who've increased productivity by 340% in 90 days
+              Join 500+ sales teams who&apos;ve increased productivity by 340% in 90 days
             </p>
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <p className="text-gray-700 text-sm italic">
-                  &quot;We went from 30% to 85% of reps hitting quota in 6 weeks. ICP Pilot didn't just give us templates - it gave us the exact expertise that only our top performers had.&quot;
+                  &quot;We went from 30% to 85% of reps hitting quota in 6 weeks. ICP Pilot didn&apos;t just give us templates - it gave us the exact expertise that only our top performers had.&quot;
                 </p>
                 <div className="mt-2 text-xs text-gray-600">
                   <strong>Result:</strong> 183% improvement in team quota attainment
@@ -185,7 +185,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <p className="text-gray-700 text-sm italic">
-                  &quot;$2.3M in new pipeline in 60 days. While our competitors hired 10 more reps, we 3x'd our output with the same team using ICP Pilot's AI-generated content.&quot;
+                  &quot;$2.3M in new pipeline in 60 days. While our competitors hired 10 more reps, we 3x&apos;d our output with the same team using ICP Pilot&apos;s AI-generated content.&quot;
                 </p>
                 <div className="mt-2 text-xs text-gray-600">
                   <strong>Result:</strong> $2.3M pipeline boost, 340% productivity increase
@@ -345,7 +345,7 @@ export default function HomePage() {
                   <ul className="text-sm text-gray-900 space-y-1">
                     <li className="flex items-start gap-2">
                       <span className="text-red-500 mt-1">•</span>
-                      <span>Team can't scale outreach volume</span>
+                      <span>Team can&apos;t scale outreach volume</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-red-500 mt-1">•</span>
@@ -389,7 +389,7 @@ export default function HomePage() {
               <div className="mb-4">
                 <div className="text-center mb-4">
                   <h4 className="text-lg font-semibold text-green-800">🎯 3 Expert Objection Responses</h4>
-                  <p className="text-sm text-green-700">For: "It's too expensive"</p>
+                  <p className="text-sm text-green-700">For: &quot;It&apos;s too expensive&quot;</p>
                 </div>
               </div>
 
@@ -400,7 +400,7 @@ export default function HomePage() {
                     <h5 className="font-semibold text-blue-700">Executive Challenger</h5>
                     <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">Direct</span>
                   </div>
-                  <p className="text-sm text-gray-800">"Sarah, I appreciate the budget concern. Having worked with 200+ VPs in high-growth SaaS, the teams still debating cost in 2024 are watching competitors capture AI advantage. Based on your $18M Series B..."</p>
+                  <p className="text-sm text-gray-800">&quot;Sarah, I appreciate the budget concern. Having worked with 200+ VPs in high-growth SaaS, the teams still debating cost in 2024 are watching competitors capture AI advantage. Based on your $18M Series B...&quot;</p>
                 </div>
 
                 {/* Consultative Partner */}
@@ -409,7 +409,7 @@ export default function HomePage() {
                     <h5 className="font-semibold text-green-700">Consultative Partner</h5>
                     <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">Question-based</span>
                   </div>
-                  <p className="text-sm text-gray-800">"That's a thoughtful concern. Can I ask - when you think about scaling from 5 to 15 reps while maintaining quality, what's your biggest worry about the ROI calculation?"</p>
+                  <p className="text-sm text-gray-800">&quot;That&apos;s a thoughtful concern. Can I ask - when you think about scaling from 5 to 15 reps while maintaining quality, what&apos;s your biggest worry about the ROI calculation?&quot;</p>
                 </div>
 
                 {/* Evidence-Driven Closer */}
@@ -418,7 +418,7 @@ export default function HomePage() {
                     <h5 className="font-semibold text-purple-700">Evidence-Driven Closer</h5>
                     <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded">ROI-focused</span>
                   </div>
-                  <p className="text-sm text-gray-800">"Let me share data from 47 similar SaaS companies. Teams your size achieved 340% productivity gains within 90 days, with economic impact of $400K-$800K annually..."</p>
+                  <p className="text-sm text-gray-800">&quot;Let me share data from 47 similar SaaS companies. Teams your size achieved 340% productivity gains within 90 days, with economic impact of $400K-$800K annually...&quot;</p>
                 </div>
               </div>
             </div>
@@ -493,7 +493,7 @@ export default function HomePage() {
                   </div>
                   <div className="text-sm">
                     <p className="font-medium text-gray-900 mb-1">Subject: Scaling Sales with Your Series A</p>
-                    <p className="text-gray-800">"Sarah, congrats on the $18M Series A! As you scale from 5 to 15 reps, curious - what's your biggest concern about maintaining message quality at volume?"</p>
+                    <p className="text-gray-800">&quot;Sarah, congrats on the $18M Series A! As you scale from 5 to 15 reps, curious - what&apos;s your biggest concern about maintaining message quality at volume?&quot;</p>
                   </div>
                 </div>
 
@@ -504,8 +504,8 @@ export default function HomePage() {
                     <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">ROI-driven</span>
                   </div>
                   <div className="text-sm">
-                    <p className="font-medium text-gray-900 mb-1">Subject: 3x Your Team's Output (Without Hiring)</p>
-                    <p className="text-gray-800">"Most VPs at your stage tell me their biggest challenge isn't finding good reps - it's getting consistent, high-quality outreach from the team they have..."</p>
+                    <p className="font-medium text-gray-900 mb-1">Subject: 3x Your Team&apos;s Output (Without Hiring)</p>
+                    <p className="text-gray-800">&quot;Most VPs at your stage tell me their biggest challenge isn&apos;t finding good reps - it&apos;s getting consistent, high-quality outreach from the team they have...&quot;</p>
                   </div>
                 </div>
 
@@ -517,7 +517,7 @@ export default function HomePage() {
                   </div>
                   <div className="text-sm">
                     <p className="font-medium text-gray-900 mb-1">Subject: Quick Question About Your Sales Stack</p>
-                    <p className="text-gray-800">"Quick question - with your recent funding and team expansion plans, how are you planning to maintain personalized outreach quality while scaling volume?"</p>
+                    <p className="text-gray-800">&quot;Quick question - with your recent funding and team expansion plans, how are you planning to maintain personalized outreach quality while scaling volume?&quot;</p>
                   </div>
                 </div>
               </div>
@@ -540,7 +540,7 @@ export default function HomePage() {
                 {/* Discovery Question 1 */}
                 <div className="bg-white border-l-4 border-blue-500 pl-3 py-2">
                   <h5 className="font-semibold text-blue-700 mb-2">Strategic Business Impact</h5>
-                  <p className="text-sm text-gray-800 font-medium mb-2">"What's driving the urgency around solving this challenge now versus waiting another quarter?"</p>
+                  <p className="text-sm text-gray-800 font-medium mb-2">&quot;What&apos;s driving the urgency around solving this challenge now versus waiting another quarter?&quot;</p>
                   <div className="text-xs text-gray-600">
                     <strong>Listen for:</strong> Competitive pressure, Board mandate, Financial impact, Market timing
                   </div>
@@ -549,7 +549,7 @@ export default function HomePage() {
                 {/* Discovery Question 2 */}
                 <div className="bg-white border-l-4 border-green-500 pl-3 py-2">
                   <h5 className="font-semibold text-green-700 mb-2">ROI and Value Quantification</h5>
-                  <p className="text-sm text-gray-800 font-medium mb-2">"If we could help you achieve the outcomes you're looking for, what would that be worth to your company?"</p>
+                  <p className="text-sm text-gray-800 font-medium mb-2">&quot;If we could help you achieve the outcomes you&apos;re looking for, what would that be worth to your company?&quot;</p>
                   <div className="text-xs text-gray-600">
                     <strong>Listen for:</strong> Specific dollar amounts, Percentage improvements, Revenue impact
                   </div>
@@ -702,7 +702,7 @@ export default function HomePage() {
           <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-8 md:p-12 text-center">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
               Your Competitors Are Already Using AI.
-              <span className="text-red-600"> Don't Get Left Behind.</span>
+              <span className="text-red-600"> Don&apos;t Get Left Behind.</span>
             </h2>
             <p className="text-xl mb-8 text-gray-700">
               While you manually write one email, teams with ICP Pilot generate 20 expert-level messages.

@@ -5,8 +5,11 @@
  * Validates build readiness and environment configuration
  */
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const fs = require('fs');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const path = require('path');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { execSync } = require('child_process');
 
 const PROJECT_ROOT = process.cwd();

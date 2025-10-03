@@ -70,7 +70,7 @@ export class InfrastructureOptimizer {
    * Next.js Performance Optimization Analysis
    */
   analyzeNextJSPerformance(): {
-    currentConfig: any;
+    currentConfig: Record<string, unknown>;
     optimizations: OptimizationRecommendation[];
     implementationPlan: string[];
   } {
@@ -149,9 +149,9 @@ export class InfrastructureOptimizer {
    * Database Connection Optimization
    */
   analyzeDatabasePerformance(): {
-    connectionAnalysis: any;
+    connectionAnalysis: Record<string, unknown>;
     recommendations: OptimizationRecommendation[];
-    connectionPoolConfig: any;
+    connectionPoolConfig: Record<string, unknown>;
   } {
     const recommendations: OptimizationRecommendation[] = [];
 
@@ -380,7 +380,7 @@ export class InfrastructureOptimizer {
   }
 
   // Private helper methods
-  private getCurrentNextConfig(): any {
+  private getCurrentNextConfig(): Record<string, unknown> {
     // In a real implementation, this would read the actual next.config.js
     return {
       experimental: {
@@ -430,7 +430,7 @@ export class InfrastructureOptimizer {
     };
   }
 
-  private analyzeCurrentConnections(): any {
+  private analyzeCurrentConnections(): Record<string, unknown> {
     return {
       provider: 'Neon Serverless',
       connectionType: 'HTTP',

@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     
     // Helper function to safely parse array data
-    const parseArrayField = (field: any): string[] => {
+    const parseArrayField = (field: unknown): string[] => {
       if (!field) return [];
       if (Array.isArray(field)) return field;
       if (typeof field === 'string') {

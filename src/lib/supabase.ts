@@ -105,7 +105,7 @@ export type Database = {
           icp_id: string | null
           type: string
           title: string
-          content: any
+          content: Record<string, unknown>
           created_at: string
           updated_at: string
         }
@@ -115,7 +115,7 @@ export type Database = {
           icp_id?: string | null
           type: string
           title: string
-          content: any
+          content: Record<string, unknown>
           created_at?: string
           updated_at?: string
         }
@@ -125,7 +125,7 @@ export type Database = {
           icp_id?: string | null
           type?: string
           title?: string
-          content?: any
+          content?: Record<string, unknown>
           created_at?: string
           updated_at?: string
         }

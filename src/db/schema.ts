@@ -31,7 +31,6 @@ export const icps = pgTable('icps', {
   productService: text('product_service'),
   valueProposition: text('value_proposition'),
   keyDifferentiators: text('key_differentiators').array(),
-  isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
@@ -42,7 +41,6 @@ export const outputs = pgTable('outputs', {
   icpId: uuid('icp_id').references(() => icps.id).notNull(),
   type: varchar('type', { length: 50 }).notNull(),
   title: varchar('title', { length: 255 }).notNull(),
-  input: jsonb('input').notNull(),
   output: jsonb('output').notNull(),
   isFavorite: boolean('is_favorite').default(false),
   isSaved: boolean('is_saved').default(false), // User explicitly saved to library

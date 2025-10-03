@@ -51,14 +51,5 @@ export async function getCurrentUser() {
     return newUser[0];
   }
 
-  // Verify session consistency for state reliability
-  const userRecord = userData[0];
-  const validation = await stateReliabilityAgent.verifySessionConsistency(userRecord.id);
-
-  if (!validation.isConsistent && validation.correctedState) {
-    // Use corrected state if available
-    return validation.correctedState;
-  }
-
-  return userRecord;
+  return userData[0];
 }

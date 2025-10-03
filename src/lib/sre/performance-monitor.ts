@@ -15,7 +15,7 @@ export interface PerformanceMetric {
   timestamp: number;
   operation: string;
   duration: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   severity: 'low' | 'medium' | 'high' | 'critical';
 }
 
@@ -247,7 +247,14 @@ export class PerformanceMonitor {
    * Performance Analytics and Reporting
    */
   getPerformanceReport(timeRange: number = 3600000): {
-    summary: any;
+    summary: {
+      totalMetrics: number;
+      averageDBQueryTime: number;
+      averageAPIResponseTime: number;
+      criticalIssues: number;
+      slowQueries: number;
+      slowAPIs: number;
+    };
     slowQueries: DatabaseMetric[];
     slowAPIs: APIMetric[];
     recommendations: string[];
@@ -370,7 +377,14 @@ export class PerformanceMonitor {
   }
 
   private generateRecommendations(
-    summary: any,
+    summary: {
+      totalMetrics: number;
+      averageDBQueryTime: number;
+      averageAPIResponseTime: number;
+      criticalIssues: number;
+      slowQueries: number;
+      slowAPIs: number;
+    },
     slowQueries: DatabaseMetric[],
     slowAPIs: APIMetric[]
   ): string[] {

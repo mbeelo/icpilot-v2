@@ -134,10 +134,10 @@ export class SREOrchestrator {
   async getSystemAnalysis(): Promise<{
     systemHealth: 'excellent' | 'good' | 'concerning' | 'critical';
     keyMetrics: {
-      performance: any;
-      reliability: any;
-      infrastructure: any;
-      readiness: any;
+      performance: Record<string, unknown>;
+      reliability: Record<string, unknown>;
+      infrastructure: Record<string, unknown>;
+      readiness: Record<string, unknown>;
     };
     actionableRecommendations: Array<{
       priority: 'immediate' | 'high' | 'medium' | 'low';
@@ -288,7 +288,7 @@ export class SREOrchestrator {
   }
 
   // Private helper methods
-  private calculatePerformanceStatus(report: any): { status: 'good' | 'warning' | 'critical' } {
+  private calculatePerformanceStatus(report: Record<string, unknown>): { status: 'good' | 'warning' | 'critical' } {
     if (report.summary.averageAPIResponseTime > 5000 || report.summary.errorRate > 0.05) {
       return { status: 'critical' };
     } else if (report.summary.averageAPIResponseTime > 2000 || report.summary.errorRate > 0.01) {
@@ -297,7 +297,7 @@ export class SREOrchestrator {
     return { status: 'good' };
   }
 
-  private calculateReliabilityMetrics(report: any): {
+  private calculateReliabilityMetrics(report: Record<string, unknown>): {
     consistencyPercentage: number;
     sessionHealth: 'stable' | 'issues' | 'critical';
   } {
@@ -318,7 +318,7 @@ export class SREOrchestrator {
     return { consistencyPercentage, sessionHealth };
   }
 
-  private calculateInfrastructureMetrics(analysis: any): {
+  private calculateInfrastructureMetrics(analysis: Record<string, unknown>): {
     status: 'optimal' | 'needs_optimization' | 'critical';
     optimizationScore: number;
     criticalRecommendations: number;
@@ -359,10 +359,10 @@ export class SREOrchestrator {
   }
 
   private compileActionableRecommendations(
-    performanceReport: any,
-    stateReport: any,
-    optimizationPlan: any,
-    readinessAssessment: any
+    performanceReport: Record<string, unknown>,
+    stateReport: Record<string, unknown>,
+    optimizationPlan: Record<string, unknown>,
+    readinessAssessment: Record<string, unknown>
   ): Array<{
     priority: 'immediate' | 'high' | 'medium' | 'low';
     category: string;
@@ -419,7 +419,7 @@ export class SREOrchestrator {
     return recommendations.slice(0, 20); // Top 20 recommendations
   }
 
-  private identifyEmergencyActions(dashboard: SREDashboard, readinessAssessment: any): string[] {
+  private identifyEmergencyActions(dashboard: SREDashboard, readinessAssessment: Record<string, unknown>): string[] {
     const emergencyActions: string[] = [];
 
     if (dashboard.overallHealth === 'critical') {

@@ -26,7 +26,7 @@ export interface HealthCheck {
   status: 'healthy' | 'degraded' | 'unhealthy';
   responseTime: number;
   lastChecked: number;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
 }
 
 export interface ErrorPattern {
@@ -127,7 +127,7 @@ export class LaunchReadinessAgent {
     testResults: Array<{
       scenario: string;
       passed: boolean;
-      details: any;
+      details: Record<string, unknown>;
     }>;
     criticalIssues: string[];
     recommendations: string[];
@@ -715,7 +715,7 @@ export class LaunchReadinessAgent {
 
   private generateLaunchRecommendations(
     readiness: 'ready' | 'needs_work' | 'not_ready',
-    testResults: any[],
+    testResults: Array<{ scenario: string; passed: boolean; details: Record<string, unknown> }>,
     criticalIssues: string[]
   ): string[] {
     const recommendations: string[] = [];

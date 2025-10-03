@@ -8,7 +8,7 @@
  * 4. Authentication flow optimization
  */
 
-import { createServerSupabaseClient } from '@/lib/supabase-server';
+import { getCurrentUser } from '@/lib/session';
 import { db, users } from '@/db';
 import { eq } from 'drizzle-orm';
 import { SUBSCRIPTION_TIERS } from '@/lib/constants';
@@ -19,14 +19,14 @@ export interface StateInconsistency {
   description: string;
   userId?: string;
   timestamp: number;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface UserStateSnapshot {
   userId: string;
-  sessionState: any;
-  databaseState: any;
-  localStorageState?: any;
+  sessionState: Record<string, unknown>;
+  databaseState: Record<string, unknown>;
+  localStorageState?: Record<string, unknown>;
   inconsistencies: StateInconsistency[];
   timestamp: number;
 }
@@ -54,15 +54,14 @@ export class StateReliabilityAgent {
   async verifySessionConsistency(userId?: string): Promise<{
     isConsistent: boolean;
     issues: StateInconsistency[];
-    correctedState?: any;
+    correctedState?: Record<string, unknown>;
   }> {
     const issues: StateInconsistency[] = [];
 
     try {
-      const supabase = createServerSupabaseClient();
-      const { data: { user }, error } = await supabase.auth.getUser();
+      const user = await getCurrentUser();
 
-      if (error || !user?.id) {
+      if (!user?.id) {
         if (userId) {
           issues.push({
             type: 'session',
@@ -70,7 +69,7 @@ export class StateReliabilityAgent {
             description: 'User session missing but user ID provided',
             userId,
             timestamp: Date.now(),
-            metadata: { expectedUserId: userId, error: error?.message }
+            metadata: { expectedUserId: userId }
           });
         }
         return { isConsistent: !userId, issues };
@@ -112,7 +111,7 @@ export class StateReliabilityAgent {
         const dbTier = userRecord.subscriptionTier || 'free';
 
         // Just verify that the database has valid subscription data
-        if (!Object.values(SUBSCRIPTION_TIERS).includes(dbTier as any)) {
+        if (!Object.values(SUBSCRIPTION_TIERS).includes(dbTier as string)) {
           issues.push({
             type: 'subscription',
             severity: 'high',
@@ -198,7 +197,7 @@ export class StateReliabilityAgent {
         // Note: In a real implementation, you'd verify against Stripe API
         // For now, we'll assume the current tier is correct if Stripe ID exists
 
-        if (!Object.values(SUBSCRIPTION_TIERS).includes(currentTier as any)) {
+        if (!Object.values(SUBSCRIPTION_TIERS).includes(currentTier as string)) {
           issues.push({
             type: 'subscription',
             severity: 'high',
@@ -329,15 +328,14 @@ export class StateReliabilityAgent {
 
     // Measure session lookup time
     const sessionStart = performance.now();
-    const supabase = createServerSupabaseClient();
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const user = await getCurrentUser();
     const sessionTime = performance.now() - sessionStart;
 
     // Measure database query time
     const dbStart = performance.now();
     let dbTime = 0;
 
-    if (!error && user?.id) {
+    if (user?.id) {
       const userRecord = await db.select().from(users).where(eq(users.id, user.id)).limit(1);
       dbTime = performance.now() - dbStart;
 
@@ -387,7 +385,7 @@ export class StateReliabilityAgent {
   async repairStateInconsistency(userId: string): Promise<{
     repaired: boolean;
     actions: string[];
-    newState: any;
+    newState: Record<string, unknown> | null;
   }> {
     const actions: string[] = [];
 
@@ -516,8 +514,8 @@ export class StateReliabilityAgent {
 
   private storeStateSnapshot(
     userId: string,
-    sessionState: any,
-    databaseState: any,
+    sessionState: Record<string, unknown>,
+    databaseState: Record<string, unknown>,
     inconsistencies: StateInconsistency[]
   ): void {
     const snapshot: UserStateSnapshot = {

@@ -13,10 +13,8 @@ export async function createServerSupabaseClient() {
     supabaseAnonKey,
     {
       cookies: {
-        get(name: string) {
-          const cookie = cookieStore.get(name)?.value;
-          console.log(`API Route cookie get: ${name} = ${cookie ? 'EXISTS' : 'MISSING'}`);
-          return cookie;
+        async get(name: string) {
+          return cookieStore.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
           try {
