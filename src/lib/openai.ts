@@ -43,21 +43,25 @@ async function callOpenAI(params: OpenAI.Chat.ChatCompletionCreateParams, fallba
 // Safe JSON parser with comprehensive error handling
 function safeJsonParse(content: string, fallback: Record<string, unknown>): Record<string, unknown> {
   try {
-    // More aggressive cleaning for JSON parsing
-    const cleaned = content
-      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove control chars but keep \n (0x0A) and \r (0x0D) and \t (0x09)
-      .replace(/\n/g, '\\n') // Escape actual newlines in JSON strings
-      .replace(/\r/g, '\\r') // Escape carriage returns
-      .replace(/\t/g, '\\t') // Escape tabs
-      .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
-      .trim();
-
-    return JSON.parse(cleaned);
+    // First try parsing the content as-is since OpenAI usually returns valid JSON
+    const trimmed = content.trim();
+    return JSON.parse(trimmed);
   } catch (error) {
-    console.error('JSON Parse Error:', error);
-    console.error('Raw content:', content);
-    console.warn('Using fallback data');
-    return fallback;
+    try {
+      // If that fails, try basic cleaning
+      const cleaned = content
+        .trim()
+        .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove control chars but preserve actual JSON formatting
+        .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas only
+        .replace(/([^\\])\\(?!["\\/bfnrt])/g, '$1\\\\'); // Fix unescaped backslashes
+
+      return JSON.parse(cleaned);
+    } catch (secondError) {
+      console.error('JSON Parse Error:', secondError);
+      console.error('Raw content:', content);
+      console.warn('Using fallback data');
+      return fallback;
+    }
   }
 }
 
