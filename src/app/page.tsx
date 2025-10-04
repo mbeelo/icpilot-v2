@@ -687,7 +687,7 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto px-4 text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             Stop Losing Deals to Faster Teams.
-            <span className="text-red-600"> Start Winning Today.</span>
+            <span className="text-green-600"> Start Winning Today.</span>
           </h2>
           <p className="text-xl mb-8 text-gray-700 max-w-4xl mx-auto">
             While you spend hours crafting one message, smart sales teams generate 20 expert responses in minutes.
