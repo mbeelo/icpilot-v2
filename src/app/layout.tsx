@@ -19,6 +19,11 @@ export const metadata: Metadata = {
     template: "%s | ICP Pilot"
   },
   description: "Transform your B2B sales process with AI-powered tools for ideal customer profiling, objection handling, message generation, and qualification frameworks. Built on proven sales methodologies.",
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
   keywords: [
     "sales enablement",
     "B2B sales",

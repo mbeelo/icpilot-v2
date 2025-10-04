@@ -87,7 +87,7 @@ export default function HomePage() {
       <header className="border-b bg-white sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-blue-600">ICP Pilot</h1>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <Link href="/blog">
               <Button variant="ghost">Blog</Button>
             </Link>
@@ -102,39 +102,31 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 py-20 md:py-28">
+      <section className="max-w-7xl mx-auto px-4 py-16 md:py-20">
         <div className="text-center max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            Generate 3 Expert Objection Rebuttals,<br/>
-            Personalized Messages & Qualification Frameworks<br/>
-            <span className="text-blue-600">In Under 30 Seconds</span>
+          {/* 3-Word Slogan */}
+          <h1 className="text-6xl md:text-7xl font-black text-gray-900 mb-8 leading-none tracking-tight">
+            SELL<span className="text-blue-600"> SMARTER</span> FASTER
           </h1>
-          <p className="text-xl text-gray-600 mb-4 leading-relaxed">
-            While your competitors spend hours writing one email, you&apos;ll generate 3 expert-level objection rebuttals,
-            personalized cold messages, and qualification frameworks that outperform 90% of sales reps.
+
+          {/* Short Description */}
+          <p className="text-2xl md:text-3xl text-gray-700 mb-12 font-medium">
+            Turn <span className="text-blue-600">every</span> rep into a top performer
           </p>
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-lg">
-            <p className="text-lg font-semibold text-gray-900">
-              🔥 <span className="text-red-600">Limited Time:</span> See a 3x improvement in your first 30 days or get your money back
-            </p>
-          </div>
-          <div className="flex flex-col items-center gap-4">
-            <Link href="/demo/objection-killer" className="w-full max-w-lg">
-              <Button size="xl" className="w-full text-xl px-8 py-5 bg-green-600 hover:bg-green-700 shadow-xl font-bold">
-                🚀 See World-Class Sales Content Generated Live
+
+          {/* Main CTA Button */}
+          <div className="mb-8">
+            <Link href="/demo/objection-killer">
+              <Button size="xl" className="text-2xl px-12 py-6 bg-blue-600 hover:bg-blue-700 shadow-2xl font-bold rounded-xl">
+                See It Work Live
               </Button>
             </Link>
-            <p className="text-sm text-gray-500 font-medium">No signup required • Watch AI create expert-level content in real-time</p>
-            <p className="text-xs text-blue-600 font-medium">👆 Then start your free trial with 5 outputs included</p>
           </div>
-          <div className="mt-6 text-center">
-            <p className="text-sm font-medium text-green-600 mb-2">
-              ✅ 5 free outputs • ✅ No credit card required • ✅ 2-minute setup
-            </p>
-            <p className="text-xs text-gray-500">
-              Join 500+ sales teams who&apos;ve increased productivity by 340% in 90 days
-            </p>
-          </div>
+
+          {/* Simple Social Proof */}
+          <p className="text-lg text-gray-500">
+            Trusted by 500+ sales teams
+          </p>
         </div>
       </section>
 
@@ -607,14 +599,9 @@ export default function HomePage() {
       <section className="bg-gray-50 py-20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-                🔥 Flash Sale: 50% Off First 3 Months
-              </h2>
-              <p className="text-lg text-red-600 font-semibold">
-                Limited time offer • Normally $49/month • New customers only
-              </p>
-            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Choose Your Plan
+            </h2>
             <p className="text-xl text-gray-600">
               Join 500+ teams who upgraded in the last 30 days
             </p>
@@ -697,58 +684,32 @@ export default function HomePage() {
 
       {/* CTA Section */}
       <section className="py-20">
-        <div className="max-w-5xl mx-auto px-4">
-          {/* Final Push Section */}
-          <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-8 md:p-12 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Your Competitors Are Already Using AI.
-              <span className="text-red-600"> Don&apos;t Get Left Behind.</span>
-            </h2>
-            <p className="text-xl mb-8 text-gray-700">
-              While you manually write one email, teams with ICP Pilot generate 20 expert-level messages.
-              The performance gap widens every day you wait.
+        <div className="max-w-5xl mx-auto px-4 text-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            Stop Losing Deals to Faster Teams.
+            <span className="text-red-600"> Start Winning Today.</span>
+          </h2>
+          <p className="text-xl mb-8 text-gray-700 max-w-4xl mx-auto">
+            While you spend hours crafting one message, smart sales teams generate 20 expert responses in minutes.
+          </p>
+
+          <h3 className="text-2xl font-bold mb-8 text-gray-900">See What You're Missing in 30 Seconds</h3>
+
+          <div className="mb-8">
+            <Link href="/demo/objection-killer">
+              <Button size="xl" className="text-2xl px-12 py-6 bg-blue-600 text-white hover:bg-blue-700 font-bold shadow-lg rounded-xl">
+                TRY ICP PILOT
+              </Button>
+            </Link>
+          </div>
+
+          <div className="pt-6">
+            <p className="text-sm text-gray-600 mb-2">
+              ✅ 5 free outputs • ✅ No credit card required • ✅ Cancel anytime
             </p>
-
-            <div className="grid md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white border border-red-200 p-6 rounded-lg">
-                <div className="text-3xl font-bold text-red-600 mb-2">Every Day</div>
-                <p className="text-gray-700">Your competitors send 10x more personalized outreach</p>
-              </div>
-              <div className="bg-white border border-yellow-200 p-6 rounded-lg">
-                <div className="text-3xl font-bold text-yellow-600 mb-2">Every Week</div>
-                <p className="text-gray-700">They capture prospects you could have won</p>
-              </div>
-              <div className="bg-white border border-green-200 p-6 rounded-lg">
-                <div className="text-3xl font-bold text-green-600 mb-2">Every Month</div>
-                <p className="text-gray-700">The revenue gap becomes impossible to close</p>
-              </div>
-            </div>
-
-            <div className="bg-blue-600 text-white p-6 rounded-lg mb-8">
-              <h3 className="text-2xl font-bold mb-4">🚀 Get Your Competitive Advantage in 30 Seconds</h3>
-              <div className="flex flex-col md:flex-row gap-4 justify-center items-center">
-                <Link href="/demo/objection-killer" className="w-full md:w-auto">
-                  <Button size="xl" className="w-full md:w-auto text-xl px-8 py-4 bg-green-600 text-white hover:bg-green-700 font-bold shadow-lg">
-                    🔥 See ICP Pilot Work (30 Seconds)
-                  </Button>
-                </Link>
-                <span className="text-blue-200 font-medium">OR</span>
-                <Link href="/register" className="w-full md:w-auto">
-                  <Button size="xl" className="w-full md:w-auto text-xl px-8 py-4 bg-white text-blue-600 hover:bg-gray-50 font-bold shadow-lg">
-                    Start Free Trial →
-                  </Button>
-                </Link>
-              </div>
-            </div>
-
-            <div className="border-t border-blue-300 pt-6">
-              <p className="text-sm text-gray-600 mb-2">
-                ✅ 5 free outputs • ✅ No credit card required • ✅ Cancel anytime
-              </p>
-              <p className="text-xs text-gray-500">
-                Join the 500+ sales teams who chose to lead instead of follow
-              </p>
-            </div>
+            <p className="text-xs text-gray-500">
+              Join the 500+ sales teams who chose to lead instead of follow
+            </p>
           </div>
         </div>
       </section>
