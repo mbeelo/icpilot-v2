@@ -38,7 +38,6 @@ export async function saveTempOutput(
     icpId,
     type,
     title,
-    input,
     output,
     isTemporary: true,
     isSaved: false,

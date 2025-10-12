@@ -18,7 +18,6 @@ export async function POST(request: NextRequest) {
       icpId: body.icpId,
       type: body.type,
       title: body.title,
-      input: body.input,
       output: body.output,
     }).returning();
 
