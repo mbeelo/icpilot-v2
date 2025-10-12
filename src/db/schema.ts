@@ -41,6 +41,7 @@ export const outputs = pgTable('outputs', {
   icpId: uuid('icp_id').references(() => icps.id).notNull(),
   type: varchar('type', { length: 50 }).notNull(),
   title: varchar('title', { length: 255 }).notNull(),
+  input: jsonb('input'),
   output: jsonb('output').notNull(),
   isFavorite: boolean('is_favorite').default(false),
   isSaved: boolean('is_saved').default(false), // User explicitly saved to library

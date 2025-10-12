@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       'framework',
       `${frameworkType} Framework`,
       { frameworkType, customContext, prospectInfo, qualificationContext },
-      framework // Save framework data directly for library display
+      framework as Record<string, unknown> // Save framework data directly for library display
     );
     
     // Increment frameworks counter

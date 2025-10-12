@@ -12,7 +12,7 @@ export async function GET() {
 
     const subscriptionTier = user.subscriptionTier || SUBSCRIPTION_TIERS.FREE;
     const usageCount = user.usageCount || 0;
-    const limit = SUBSCRIPTION_LIMITS[subscriptionTier].outputs;
+    const limit = SUBSCRIPTION_LIMITS[subscriptionTier as keyof typeof SUBSCRIPTION_LIMITS].outputs;
 
     // Check if user has reached their limit
     const hasReachedLimit = subscriptionTier === SUBSCRIPTION_TIERS.FREE && usageCount >= limit;

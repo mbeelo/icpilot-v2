@@ -26,7 +26,7 @@ export async function getCurrentUser() {
     'getCurrentUser - fetch user by session ID'
   )(() => db.select().from(users).where(eq(users.id, user.id)).limit(1));
 
-  if (!userData.length) {
+  if (!userData || userData.length === 0) {
     // User exists in Supabase Auth but not in our database
     // Create the user record
     console.log('Creating user record for Supabase auth user:', user.id);
